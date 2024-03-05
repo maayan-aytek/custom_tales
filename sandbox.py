@@ -20,9 +20,9 @@ def text_to_speech(text, voice_id, emphasized_word):
     engine.runAndWait()
 
 # Example usage
-text = "The quick brown fox jumps over the lazy dog"
-emphasized_word = "fox" 
-text_to_speech(text, 1, "fox")
+# text = "The quick brown fox jumps over the lazy dog"
+# emphasized_word = "fox" 
+# text_to_speech(text, 1, "fox")
 # text_to_speech("""Once upon a time in a small village nestled amidst rolling hills and whispering forests, there lived a young girl named Elara. Elara was captivated by the night sky, spending countless hours gazing up at the twinkling stars, each one a beacon of hope and wonder in her eyes.
 # One crisp autumn evening, as the moon rose high above the village, Elara slipped out of her cozy cottage and made her way to her favorite spot, a grassy knoll just beyond the outskirts of town. She lay down upon the soft earth, her eyes tracing the constellations above.
 # As she watched, a shooting star streaked across the heavens, and Elara closed her eyes, making a wish with all her heart. When she opened them again, she saw something remarkable—a figure standing before her, bathed in the gentle glow of moonlight.
@@ -33,3 +33,25 @@ text_to_speech(text, 1, "fox")
 # Then, one fateful night, as she lay beneath the stars once more, Orion appeared before her. He took her hand and together they danced across the heavens, a symphony of starlight and magic.
 # From that moment on, Elara and Orion shared many more nights together, their bond growing stronger with each passing moment. And though they came from different worlds, their love knew no bounds, transcending time and space itself.
 # And so, as the world slumbered beneath a blanket of stars, Elara and Orion danced on, their love shining bright for all eternity.""", 1)
+
+
+import json
+from google.cloud import firestore
+print("s")
+with open('config.json', 'r') as file:
+    config = json.load(file)
+FIREBASE_JSON = config['FIREBASE_JSON']
+db = firestore.Client.from_service_account_json(FIREBASE_JSON)
+all_users = db.collection('users').get()
+for user in all_users:
+    print(db.collection('users').document(user.id).get().to_dict())
+# db_ref = db.collection("users").document("ordado1")
+# db_ref.set({
+#     "general_information":
+#     {
+#     "name": "or",
+#     "gender": "male",
+#     "age": "6",
+#     "interests": "footbal"
+#     }
+# })
