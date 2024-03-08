@@ -1,3 +1,4 @@
 {
-    "OPENAI_KEY": "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"
+    "OPENAI_KEY": "key",
+    "FIREBASE_JSON": "database key"
 }

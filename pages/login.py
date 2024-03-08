@@ -1,7 +1,7 @@
 import streamlit as st
 import json
 from google.cloud import firestore
-from utils import set_background, get_base64, init_page, get_db_connection
+from utils import *
 from streamlit_extras.switch_page_button import switch_page
 
 st.set_page_config(layout="centered",
@@ -9,32 +9,17 @@ st.set_page_config(layout="centered",
                     page_title="CustomTales",
                     page_icon=f'photos/logo.png')
 set_background(rf'photos/background.png')
-
-init_page()
+set_logo()
+set_button(buttons_right="-217", margin_top="50")
+set_text_input()
 db = get_db_connection()
-
-st.markdown("""  
-<style>  
-    .stTextInput input {  
-        color: white;  
-        height: 45px;
-        border-radius: 25px;  
-        backgroud-color: lightgray;
-    }  
-    
-    .stTextInput {
-        width: 250px;
-        height: 100px;
-        margin-left: 190px; 
-        margin-bottom: -55px;
-    }
-</style>  
-""", unsafe_allow_html=True)
 
 user_name = st.text_input("", placeholder="username")
 password = st.text_input("", type="password", placeholder="password")
+is_click_login = st.button("# Login")
 
-if user_name and password:
+
+if is_click_login:
     all_users = db.collection('users').get()
     incorrect_details = False
     for user in all_users:
@@ -52,6 +37,7 @@ if user_name and password:
             }  
         </style>  
         """, unsafe_allow_html=True)
-        st.warning("⚠️ Incorrect username or password. Please try again.")
-# help="""Passwords should contain three of the four character types:\n\nUppercase letters: A-Z\n\nLowercase letters: a-z\n\nNumbers: 0-9""")
+        st.warning("Incorrect username or password. Please try again.", icon="⚠️")
+
+
 
