@@ -1,5 +1,5 @@
 import streamlit as st
-from utils import set_background, get_base64, init_page
+from utils import *
 from streamlit_extras.switch_page_button import switch_page
 
 st.set_page_config(layout="centered",
@@ -7,7 +7,9 @@ st.set_page_config(layout="centered",
                     page_title="CustomTales",
                     page_icon=f'photos/logo.png')
 
-init_page(buttons_right="-220")
+set_background(rf'photos/background.png')
+set_logo(logo_width=35, margin_bottom="-30", margin_left="210")
+set_button(buttons_right="-230", margin_top="0")
 
 st.markdown(" Welcome to Custom Tales! An interactive storytelling platform, where creativity meets personalization.\n")
 st.write(

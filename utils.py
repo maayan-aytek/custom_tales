@@ -1,11 +1,46 @@
 import base64
-import streamlit as st
+import streamlit as st 
+import json 
+import openai 
+
+@st.cache_resource
+def get_openAI_client():
+    with open('config.json', 'r') as file:
+        config = json.load(file)
+
+    OPENAI_KEY = config['OPENAI_KEY']
+    openai.api_key = OPENAI_KEY
+    client = openai.OpenAI(api_key=OPENAI_KEY)
+    return client
 
 @st.cache_data
 def get_base64(bin_file):
     with open(bin_file, 'rb') as f:
         data = f.read()
     return base64.b64encode(data).decode()
+
+@st.cache_data
+def set_image_porperties(path="photos/generate_story_image.png", image_resize=0.1, x_padding=-12, y_padding=-12):
+    import base64  
+    from PIL import Image  
+    import io 
+    with Image.open(path) as img:  
+        # Resize the image
+        width, height = img.size   
+        resized_img = img.resize((int(width * image_resize), int(height * image_resize)))  
+        x, y = resized_img.size  
+        new_img = Image.new('RGB', (x, y), 'white') 
+        new_img.paste(resized_img, (x_padding, y_padding)) 
+    
+    # Convert the image to bytes  
+    img_byte_arr = io.BytesIO()  
+    new_img.save(img_byte_arr, format='PNG')  
+    img_byte_arr = img_byte_arr.getvalue()  
+    
+    # Convert the bytes to base64 string  
+    b64_string = base64.b64encode(img_byte_arr).decode("utf-8")  
+    return b64_string
+
 
 @st.cache_data
 def set_background(png_file):
@@ -112,7 +147,6 @@ def set_number_input(width="250", margin_bottom="-55"):
     st.markdown(
     f""" 
     <style>  
-        
         .stNumberInput {{
             width: {width}px;
             height: 67px;
@@ -141,13 +175,74 @@ def set_selectbox_input(width="250", margin_bottom="-55"):
     </style>
     """
     ,unsafe_allow_html=True)
-
-def init_page(logo_width=200, buttons_right="500"):
-    set_background(rf'photos/background.png')
-    set_logo(logo_width)
-    set_button(buttons_right)
-    set_text_input()
     
-    
+def set_help_tooltip(margin_left='100'):
+    st.markdown(  
+    f"""  
+    <style>  
+    .stTooltip {{  
+        margin-left: {margin_left}px;  
+    }}  
+    </style>  
+    """,  
+    unsafe_allow_html=True)  
 
+
+def set_image_circle_button(b64_string, margin_left='20'):
+    st.markdown(f"""    
+            <style>    
+                div.stButton > button:first-child {{    
+                    background-image: url("data:image/jpg;base64,{b64_string}");   
+                    color: white;    
+                    height: 10em;    
+                    width: 10em;    
+                    border-radius: 50%;    
+                    border: 2px solid #BCA7E8;    
+                    font-size: 8px;    
+                    font-weight: bold;    
+                    display: block;    
+                    box-sizing: border-box;    
+                    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.25);
+                    margin-left: {margin_left}px;
+                }}    
+        
+                div.stButton > button:hover {{  
+                    border: 2px solid #6A0DAD; 
+                }}  
+        
+                div.stButton > {{
+                    position: relative;    
+                    top: 3px; 
+                }}  
+    
+            </style>    
+        """, unsafe_allow_html=True) 
+    
+def set_circle_button(margin_left='100'):    
+    st.markdown(f"""        
+            <style>        
+                div.stButton > button:first-child {{        
+                    background-color: rgba(255, 255, 255, 0.5);       
+                    color: purple;        
+                    height: 5em;        
+                    width: 5em;        
+                    border-radius: 50%;        
+                    border: 2px solid #BCA7E8;        
+                    font-size: 12px;     
+                    line-height: 1em;  
+                    box-sizing: border-box;        
+                    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.25);  
+                }}        
+  
+                div.stButton > button:hover {{      
+                    border: 2px solid #6A0DAD;     
+                }}   
+  
+                div.stButton {{        
+                    display: flex;        
+                    justify-content: center;        
+                    align-items: center;   
+                }}      
+            </style>        
+        """, unsafe_allow_html=True)    
     

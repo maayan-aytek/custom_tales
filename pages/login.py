@@ -26,7 +26,12 @@ if is_click_login:
         if user.id == user_name:
             user_dict = db.collection('users').document(user.id).get().to_dict()
             if user_dict["password"] == password:
-                switch_page("main")
+                st.session_state['USERNAME'] = user_name
+                st.session_state['NAME'] = user_dict['general_information']['name']
+                st.session_state['AGE'] = user_dict['general_information']['age']
+                st.session_state['GENDER'] = user_dict['general_information']['gender']
+                st.session_state['INTERESTS'] = user_dict['general_information']['interests']
+                switch_page("home")
                 break
 
     incorrect_details = True

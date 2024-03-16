@@ -3,7 +3,6 @@ from utils import *
 from streamlit_extras.switch_page_button import switch_page
 
 
-
 st.set_page_config(layout="centered",
                    initial_sidebar_state="collapsed",
                     page_title="CustomTales",
@@ -12,24 +11,22 @@ st.set_page_config(layout="centered",
 set_background(rf'photos/background.png')
 set_logo()
 set_button(buttons_right="-215", margin_top="0")
-col1, col2, col3 = st.columns([0.09, 0.8, 0.11])
+
+name = st.session_state['NAME']
+
+col1, col2, col3 = st.columns([0.32, 0.6, 0.01])
 with col1:
     st.write("")
 with col2:
-    st.title("Welcome to CustomTales!")
+    st.title(f"Hey {name}!")
 with col3:
     st.write("")
 
-is_clicked_about = st.button("# About Us")
-is_click_login = st.button("# Login")
-is_click_sign_up = st.button("# Sign Up")
 
-if is_clicked_about:
-    switch_page("about")
-if is_click_sign_up:
-    switch_page("sign_up")
-if is_click_login:
-    switch_page("login")
-    
+is_clicked_story_time = st.button("# Story Time")
+is_click_my_stories = st.button("# My Stories")
 
-    
+if is_clicked_story_time:
+    switch_page("story_time")
+if is_click_my_stories:
+    switch_page("stats")
