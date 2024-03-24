@@ -1,19 +1,12 @@
 import streamlit as st
-import json
 from google.cloud import firestore
 from utils import *
-import pandas as pd 
 import openai
-import pyttsx3
 from streamlit_extras.switch_page_button import switch_page
 from streamlit_extras.stylable_container import stylable_container
-import numpy as np
-from transformers import SpeechT5Processor, SpeechT5ForTextToSpeech, SpeechT5HifiGan
-from datasets import load_dataset
-from multiprocessing import Pool
 import soundfile as sf
 import sounddevice as sd
-import torch
+
 
 st.set_page_config(layout="wide",
                    initial_sidebar_state="collapsed",
@@ -45,6 +38,7 @@ def main():
                 switch_page('home')
 
     chosen_story = st.session_state['chosen_story']
+    print(chosen_story['story'])
     col21, col22 = st.columns([0.85,0.15])
     with col21:
         st.markdown(f"""        
@@ -53,7 +47,6 @@ def main():
                 <p style="font-size: 15px;">{chosen_story['story'].replace('*','').replace('#','')}</p>    
             </div>    
             """, unsafe_allow_html=True)  
-        print(chosen_story['story'])
         with stylable_container(
             "speaker",
             css_styles = set_image_circle_button(b64_speaker_string, margin_left='1100', margin_top='-70'),

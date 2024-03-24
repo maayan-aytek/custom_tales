@@ -5,14 +5,15 @@ from utils import *
 import pandas as pd 
 import openai
 from streamlit_extras.switch_page_button import switch_page
+from streamlit_extras.stylable_container import stylable_container
 import pickle
 import numpy as np
 from transformers import SpeechT5Processor, SpeechT5ForTextToSpeech, SpeechT5HifiGan
 from datasets import load_dataset
-from multiprocessing import Pool
 import soundfile as sf
 import sounddevice as sd
 import torch
+import datetime
 
 LEADING_CHAR = '0'
 
@@ -21,8 +22,20 @@ st.set_page_config(layout="wide",
                     page_title="CustomTales",
                     page_icon=f'photos/logo.png')
 set_background(rf'photos/background.png')
-set_logo(logo_width="15", margin_left="455", margin_bottom="0")
+b64_home_string = set_image_porperties(path=rf'photos/home_button_image.png', image_resize=0.06, x_padding=-8, y_padding=-8)
+col01, col02, col03 = st.columns([0.05,0.05,0.8])
+with col02:
+    with stylable_container(
+        "home",
+        css_styles = set_image_circle_button(b64_home_string, margin_left='-230', margin_top='-90'),
+    ):
+        is_click_home = st.button(label='', key='button2')
+        if is_click_home:
+            switch_page('home')
+with col03:
+    set_logo(logo_width="15", margin_left="455", margin_bottom="0")
 set_circle_button()
+
 
 openAI_client = get_openAI_client()
 db = get_db_connection()
@@ -45,13 +58,15 @@ def update_story(chosen_story):
     title = chosen_story['title']
     doc_ref = db.collection("users").document(st.session_state['USERNAME'])
     doc = doc_ref.get()
+    chosen_story['generate_time'] = datetime.date.today().strftime("%d/%m/%Y")
+    chosen_story.update(st.session_state['story_details'])
     if not doc.exists or 'stories' not in doc.to_dict():
         doc_ref.update({
-            "stories": {title: chosen_story.update(st.session_state['story_details'])}
+            "stories": {title: chosen_story}
         })
     else:
         doc_ref.update({
-            f"stories.{title}": chosen_story.update(st.session_state['story_details']),
+            f"stories.{title}": chosen_story,
         })
 
     # with st.spinner('Loading story...'):
@@ -134,12 +149,14 @@ def get_response(child_age, child_gender, child_interests, story_reading_time, m
     stories = []
     for choice in completion.choices:
         generated_content = choice.message.content
+        print("-----------")
         print(generated_content)
         # Split generated content into story, title, and description
         parts = generated_content.split("Title:")
+        split_by = 'Story:' if 'Story:' in parts[1].split("Description:")[1] else '<br/>'
         title = parts[1].split("Description:")[0].strip().replace('*', '').replace('#','')
-        description = parts[1].split("Description:")[1].split("Story:")[0].strip().replace('*', '').replace('#','')
-        story = parts[1].split("Description:")[1].split("Story:")[1].strip().replace('*', '').replace('#','')
+        description = parts[1].split("Description:")[1].split(split_by)[0].strip().replace('*', '').replace('#','')
+        story = parts[1].split("Description:")[1].split(split_by)[1].strip().replace('*', '').replace('#','')
         stories.append({'story':story, 'title':title, 'description':description})
 
     return stories
@@ -156,34 +173,35 @@ if not st.session_state['is_clicked_choose_story']:
     #     stories = pickle.load(file)
         st.session_state['stories'] = stories
 
+if st.session_state['stories']:
+    stories = st.session_state['stories']
+    fill_color = "rgba(255, 255, 255, 0.5)"  
+    col1, col2, col3 = st.columns([1,1,1])  
+    max_height = max(len(stories[i]['title'])+len(stories[i]['description']) for i in range(3))*0.95
+    with col1:  
+        st.markdown(f"""        
+            <div style="border: 2px solid black; padding: 10px; margin: 10px; border-radius: 15px; background-color: {fill_color}; color: black; height: {max_height}px;">        
+                <p style="font-weight: bold; font-size: 26px; text-align: center;">{stories[0]['title'].replace('**','').replace('#','')}</p>    
+                <p style="font-size: 15px;">{stories[0]['description'].replace('*','').replace('#','')}</p>    
+            </div>    
+            """, unsafe_allow_html=True)   
+        is_story_1_clicked = st.button("1", on_click=change_sessison_state, args=['is_story_1_clicked', True])
 
-fill_color = "rgba(255, 255, 255, 0.5)"  
-col1, col2, col3 = st.columns([1,1,1])  
-max_height = max(len(stories[i]['title'])+len(stories[i]['description']) for i in range(3))*0.95
-with col1:  
-    st.markdown(f"""        
-        <div style="border: 2px solid black; padding: 10px; margin: 10px; border-radius: 15px; background-color: {fill_color}; color: black; height: {max_height}px;">        
-            <p style="font-weight: bold; font-size: 26px; text-align: center;">{stories[0]['title'].replace('**','').replace('#','')}</p>    
-            <p style="font-size: 15px;">{stories[0]['description'].replace('*','').replace('#','')}</p>    
-        </div>    
-        """, unsafe_allow_html=True)   
-    is_story_1_clicked = st.button("1", on_click=change_sessison_state, args=['is_story_1_clicked', True])
-
-with col2:  
-    st.markdown(f"""        
-        <div style="border: 2px solid black; padding: 10px; margin: 10px; border-radius: 15px; background-color: {fill_color}; color: black; height: {max_height}px;">        
-            <p style="font-weight: bold; font-size: 26px; text-align: center;">{stories[1]['title'].replace('**','').replace('#','')}</p>    
-            <p style="font-size: 15px;">{stories[1]['description'].replace('*','').replace('#','')}</p>    
-        </div>    
-        """, unsafe_allow_html=True)   
-    is_story_2_clicked = st.button("2", on_click=change_sessison_state, args=['is_story_2_clicked', True])
-    
-with col3:  
-    st.markdown(f"""        
-        <div style="border: 2px solid black; padding: 10px; margin: 10px; border-radius: 15px; background-color: {fill_color}; color: black; height: {max_height}px;">        
-            <p style="font-weight: bold; font-size: 26px; text-align: center;">{stories[2]['title'].replace('**','').replace('###','')}</p>    
-            <p style="font-size: 15px; color: black;">{stories[2]['description'].replace('*','').replace('#','')}</p>  
-        </div>    
-        """, unsafe_allow_html=True)    
-    is_story_3_clicked = st.button("3", on_click=change_sessison_state, args=['is_story_3_clicked', True]) 
+    with col2:  
+        st.markdown(f"""        
+            <div style="border: 2px solid black; padding: 10px; margin: 10px; border-radius: 15px; background-color: {fill_color}; color: black; height: {max_height}px;">        
+                <p style="font-weight: bold; font-size: 26px; text-align: center;">{stories[1]['title'].replace('**','').replace('#','')}</p>    
+                <p style="font-size: 15px;">{stories[1]['description'].replace('*','').replace('#','')}</p>    
+            </div>    
+            """, unsafe_allow_html=True)   
+        is_story_2_clicked = st.button("2", on_click=change_sessison_state, args=['is_story_2_clicked', True])
+        
+    with col3:  
+        st.markdown(f"""        
+            <div style="border: 2px solid black; padding: 10px; margin: 10px; border-radius: 15px; background-color: {fill_color}; color: black; height: {max_height}px;">        
+                <p style="font-weight: bold; font-size: 26px; text-align: center;">{stories[2]['title'].replace('**','').replace('###','')}</p>    
+                <p style="font-size: 15px; color: black;">{stories[2]['description'].replace('*','').replace('#','')}</p>  
+            </div>    
+            """, unsafe_allow_html=True)    
+        is_story_3_clicked = st.button("3", on_click=change_sessison_state, args=['is_story_3_clicked', True]) 
 
