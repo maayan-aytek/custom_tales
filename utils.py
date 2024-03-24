@@ -2,6 +2,7 @@ import base64
 import streamlit as st 
 import json 
 import openai 
+import pandas as pd
 
 @st.cache_resource
 def get_openAI_client():
@@ -19,7 +20,7 @@ def get_base64(bin_file):
         data = f.read()
     return base64.b64encode(data).decode()
 
-@st.cache_data
+# @st.cache_data
 def set_image_porperties(path="photos/generate_story_image.png", image_resize=0.1, x_padding=-12, y_padding=-12):
     import base64  
     from PIL import Image  
@@ -67,18 +68,20 @@ def get_db_connection():
     return db
 
 
-def set_button(buttons_right, margin_top="0"):
+def set_button(buttons_right, margin_top="0", font_size="18", width="200", height="50", color="white", border_color="white"):
     st.markdown(
             f"""
             <style>
                 .stButton>button {{
-                    font-size: 18px; 
+                    font-size: {font_size}px; 
                     font-weight: bold;
                     color: black; 
-                    background-color: white; 
+                    border-width: 2px;
+                    border-color: {border_color};
+                    background-color: {color}; 
                     border-radius: 25px;
-                    width: 200px; /* Set fixed width for the button */
-                    height: 50px; /* Set fixed height for the button */
+                    width: {width}px;
+                    height: {height}px;
                     position: relative;  
                     right: {buttons_right}px; 
                     margin-top: {margin_top}px;
@@ -98,30 +101,46 @@ def set_button(buttons_right, margin_top="0"):
             </style>
             """
             ,unsafe_allow_html=True)
-    
 
-def set_logo(logo_width=50, margin_left="140", margin_bottom="-50"):
+
+def set_logo(logo_width=50, margin_left="140", margin_bottom="-50", top=None, right=None):
     logo_path = rf'photos\logo.png'  
     img_base64 = get_base64(logo_path)
-    st.markdown(f"""  
-        <style>  
-            .center {{  
-                display: block;  
-                margin-left: auto;  
-                margin-right: auto; 
-                margin-top: -60px;
-                margin-bottom: {margin_bottom}px;
-                width: {logo_width}%;  
-            }}  
-                .move-left {{
-            margin-left: {margin_left}px; 
-        }}
-        </style>  
-        <img src="data:image/png;base64,{img_base64}" class="center move-left">  
-    """, unsafe_allow_html=True)
+    if top and right: 
+        st.markdown(f"""  
+            <style>  
+                .center {{  
+                    display: block;  
+                    width: {logo_width}%;  
+                }}  
+                    .move-left {{
+                position: absolute;
+                right: {right}px; 
+                top: {top}px;
+            }}
+            </style>  
+            <img src="data:image/png;base64,{img_base64}" class="center move-left">  
+        """, unsafe_allow_html=True)
+    else:
+        st.markdown(f"""  
+            <style>  
+                .center {{  
+                    display: block;  
+                    margin-left: auto;  
+                    margin-right: auto; 
+                    margin-top: -60px;
+                    margin-bottom: {margin_bottom}px;
+                    width: {logo_width}%;  
+                }}  
+                    .move-left {{
+                margin-left: {margin_left}px; 
+            }}
+            </style>  
+            <img src="data:image/png;base64,{img_base64}" class="center move-left">  
+        """, unsafe_allow_html=True)
 
 
-def set_text_input(width="250", margin_bottom="-55"):
+def set_text_input(width="250", margin_bottom="-55", margin_left='192'):
     st.markdown(
     f""" 
     <style>  
@@ -135,7 +154,7 @@ def set_text_input(width="250", margin_bottom="-55"):
         .stTextInput {{
             width: {width}px;
             height: 100px;
-            margin-left: 192px; 
+            margin-left: {margin_left}px; 
             margin-bottom: {margin_bottom}px;
         }}
     </style>  
@@ -158,12 +177,12 @@ def set_number_input(width="250", margin_bottom="-55"):
     , unsafe_allow_html=True)
 
 
-def set_selectbox_input(width="250", margin_bottom="-55"):
+def set_selectbox_input(width="250", margin_bottom="-55", margin_left='192'):
     st.markdown(
     f"""
     <style>
     .stSelectbox {{
-        margin-left: 192px; 
+        margin-left: {margin_left}px; 
         margin-bottom: {margin_bottom}px;
 	}}
 
@@ -188,14 +207,13 @@ def set_help_tooltip(margin_left='100'):
     unsafe_allow_html=True)  
 
 
-def set_image_circle_button(b64_string, margin_left='20'):
-    st.markdown(f"""    
-            <style>    
-                div.stButton > button:first-child {{    
+def set_image_circle_button(b64_string, margin_left='20', margin_top='20', radius='6'):
+    css_style = f"""    
+                    button{{
                     background-image: url("data:image/jpg;base64,{b64_string}");   
                     color: white;    
-                    height: 10em;    
-                    width: 10em;    
+                    height: {radius}em;    
+                    width: {radius}em;    
                     border-radius: 50%;    
                     border: 2px solid #BCA7E8;    
                     font-size: 8px;    
@@ -204,19 +222,9 @@ def set_image_circle_button(b64_string, margin_left='20'):
                     box-sizing: border-box;    
                     box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.25);
                     margin-left: {margin_left}px;
-                }}    
-        
-                div.stButton > button:hover {{  
-                    border: 2px solid #6A0DAD; 
-                }}  
-        
-                div.stButton > {{
-                    position: relative;    
-                    top: 3px; 
-                }}  
-    
-            </style>    
-        """, unsafe_allow_html=True) 
+                    margin-top: {margin_top}px;
+                    }}"""
+    return css_style
     
 def set_circle_button(margin_left='100'):    
     st.markdown(f"""        
@@ -232,6 +240,7 @@ def set_circle_button(margin_left='100'):
                     line-height: 1em;  
                     box-sizing: border-box;        
                     box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.25);  
+                
                 }}        
   
                 div.stButton > button:hover {{      
@@ -244,5 +253,83 @@ def set_circle_button(margin_left='100'):
                     align-items: center;   
                 }}      
             </style>        
-        """, unsafe_allow_html=True)    
+        """, unsafe_allow_html=True)
     
+
+def split_text_into_parts(text, max_tokens=400):
+    sentences = text.split(".")
+    parts = []
+    current_part = ""
+    
+    for sentence in sentences:
+        if len(current_part) + len(sentence) + 1 <= max_tokens:
+            current_part += sentence.strip() + "."
+        else:
+            parts.append(current_part.strip())
+            current_part = sentence.strip() + "."
+    
+    if current_part:
+        parts.append(current_part.strip())
+    
+    return parts
+
+
+def format_table(df,
+                 precision=None,
+                 cell_hover=True,
+                 cell_hover_color='#ffffb3',
+                 formatter:dict =None,
+                 title=None,
+                 borders=True,
+                 cells_props=None,
+                 headers_props=None,
+                 na_rep=None,
+                 **kwarg):
+    """Function for common dataframe styling operations"""
+    fill_color = "rgba(255, 255, 255, 0.5)"  
+    if isinstance(df, pd.DataFrame):
+        df_style = df.style
+    elif isinstance(df, pd.io.formats.style.Styler):
+        df_style = df
+    elif isinstance(df, pd.Series):
+        df_style = df.to_frame().style
+    else:
+        raise TypeError(f"Wrong type! format_table() can accept ['pd.DataFrame', 'pd.io.formats.style.Styler', 'pd.Series'], got {type(df)}")
+
+    styles = []
+    #headers and index props
+    if headers_props is None:
+        headers_props = [('font-size', '16px'), ('text-align', 'center !important'), ('color', 'black'), ('background-color', fill_color)]
+    styles.append(dict(selector="th", props=headers_props))
+
+    #tables cells props
+    if cells_props is None:
+        cells_props = [('font-size', '14px'), ('text-align', 'center')]
+    styles.append(dict(selector="td", props=cells_props))
+
+    #index names props
+    index_names_props = dict(selector='.index_name', props=[('font-style', 'italic')])
+    styles.append(index_names_props)
+
+    #cell hover props
+    if cell_hover:  
+        cell_hover_props = dict(selector="td:hover", props=[('background-color', cell_hover_color)])   
+        styles.append(cell_hover_props)
+        
+    #table bordes props
+    if borders:
+        borders_style_prop = dict(selector="td, th", props=[("border", "1px solid white !important")])
+        styles.append(borders_style_prop)
+    
+    #table title props
+    if title is not None:
+        title_prop = [dict(selector="caption",
+                       props=[("text-align", "center"),
+                              ("font-size", "150%"),
+                              ("color", 'black')])]
+        df_style = df_style.set_table_attributes("style='display:inline'").set_caption(title)
+        styles.extend(title_prop)
+    
+    #set styles and foramts
+    styled_df = df_style.set_table_styles(styles).format(formatter=formatter, precision=precision, na_rep=na_rep, thousands=",", **kwarg)
+    return styled_df

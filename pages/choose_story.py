@@ -6,6 +6,15 @@ import pandas as pd
 import openai
 from streamlit_extras.switch_page_button import switch_page
 import pickle
+import numpy as np
+from transformers import SpeechT5Processor, SpeechT5ForTextToSpeech, SpeechT5HifiGan
+from datasets import load_dataset
+from multiprocessing import Pool
+import soundfile as sf
+import sounddevice as sd
+import torch
+
+LEADING_CHAR = '0'
 
 st.set_page_config(layout="wide",
                    initial_sidebar_state="collapsed",
@@ -30,76 +39,151 @@ main_character_name = st.session_state['story_details']['main_character_name']
 similar_story = st.session_state['story_details']['similar_story']
 
 
-def get_response(child_age, child_gender, child_interests, story_reading_time, moral_of_the_story, mode, main_character_name):
-    prompt = f"""Generate children story suitable for a {child_age}-year-old {child_gender} child with interests in {child_interests}. 
+def update_story(chosen_story):
+    st.session_state['chosen_story'] = chosen_story
+    chosen_story = {key: LEADING_CHAR + value for key, value in chosen_story.items()}
+    title = chosen_story['title']
+    doc_ref = db.collection("users").document(st.session_state['USERNAME'])
+    doc = doc_ref.get()
+    if not doc.exists or 'stories' not in doc.to_dict():
+        doc_ref.update({
+            "stories": {title: chosen_story.update(st.session_state['story_details'])}
+        })
+    else:
+        doc_ref.update({
+            f"stories.{title}": chosen_story.update(st.session_state['story_details']),
+        })
+
+    # with st.spinner('Loading story...'):
+    #     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")  
+    #     processor = SpeechT5Processor.from_pretrained("microsoft/speecht5_tts") 
+    #     model = SpeechT5ForTextToSpeech.from_pretrained("microsoft/speecht5_tts").to(device)  
+    #     vocoder = SpeechT5HifiGan.from_pretrained("microsoft/speecht5_hifigan").to(device)  
+    #     embeddings_dataset = load_dataset("Matthijs/cmu-arctic-xvectors", split="validation")  
+    #     speaker_embeddings = torch.tensor(embeddings_dataset[7306]["xvector"]).unsqueeze(0).to(device)  
+
+        
+    #     def generate_voice(story):  
+    #         parts = split_text_into_parts(story)  
+    #         output_array = []  
+            
+    #         for part in parts:  
+    #             inputs = processor(text=part, return_tensors="pt").to(device)  
+    #             with torch.no_grad():  
+    #                 generated_speech = model.generate_speech(inputs["input_ids"], speaker_embeddings, vocoder=vocoder)  
+    #                 generated_speech = generated_speech.cpu().numpy()  
+    #             output_array.append(generated_speech)  
+        
+    #         speech = np.concatenate(output_array, axis=0)  
+    #         sf.write("tts_story.wav", speech.squeeze(), samplerate=17000)  
+        
+    #     story = chosen_story['title'] + chosen_story['story']
+    #     generate_voice(story)
+        
+    st.write("in updating story")
+    switch_page('full_story')
+
+
+if st.session_state['is_story_1_clicked']:
+    st.session_state['is_clicked_choose_story'] = True
+    st.session_state['is_story_1_clicked'] = False
+    stories = st.session_state['stories']
+    update_story(stories[0])
+if st.session_state['is_story_2_clicked']:
+    st.session_state['is_clicked_choose_story'] = True
+    st.session_state['is_story_2_clicked'] = False
+    stories = st.session_state['stories']
+    update_story(stories[1])
+if st.session_state['is_story_3_clicked']:
+    st.session_state['is_clicked_choose_story'] = True
+    st.session_state['is_story_3_clicked'] = False
+    stories = st.session_state['stories']
+    update_story(stories[2])
+
+def get_response(child_age, child_gender, child_interests, story_reading_time, moral_of_the_story, mode, main_character_name, similar_story):
+    if similar_story != 'Ignored': 
+        prompt = f"""Generate children story suitable for a {child_age}-year-old {child_gender} child with interests in {child_interests}. 
                 The story should be around {story_reading_time} minutes long. The moral of the story should be '{moral_of_the_story}'.
                 The mode of the story should be {mode}. The main character of the story should be named '{main_character_name}'.
                 Please note that the story doesn't have to include all interests mentioned; it can choose to include only a subset of them.
                 Also, avoid mixing unrelated interests. If there are multiple interests provided, choose at random only one that fits the story context best.
+                The story should be inspired by '{similar_story} children book.'
                 ### Generate title: True
                 ### Generate description: True
                 ### Generate story: True
                 """
+    else:
+        prompt = f"""Generate children story suitable for a {child_age}-year-old {child_gender} child with interests in {child_interests}. 
+                    The story should be around {story_reading_time} minutes long. The moral of the story should be '{moral_of_the_story}'.
+                    The mode of the story should be {mode}. The main character of the story should be named '{main_character_name}'.
+                    Please note that the story doesn't have to include all interests mentioned; it can choose to include only a subset of them.
+                    Also, avoid mixing unrelated interests. If there are multiple interests provided, choose at random only one that fits the story context best.
+                    ### Generate title: True
+                    ### Generate description: True
+                    ### Generate story: True
+                    """
     completion = openAI_client.chat.completions.create(
         model="gpt-3.5-turbo",
         messages=[
             {"role": "system", "content": "You're a story generator tasked with creating captivating children's stories tailored to individual preferences."},
             {"role": "user", "content": prompt},
-            # {"role": "assiatance", "content": prompt_with_assistance},
         ],
-        n=3
+        n=3,
     )
 
     stories = []
     for choice in completion.choices:
         generated_content = choice.message.content
+        print(generated_content)
         # Split generated content into story, title, and description
         parts = generated_content.split("Title:")
-        title = parts[1].split("Description:")[0].strip().replace('**', '').replace('###','')
-        description = parts[1].split("Description:")[1].split("Story:")[0].strip().replace('**', '').replace('###','')
-        story = parts[1].split("Description:")[1].split("Story:")[1].strip().replace('**', '').replace('###','')
+        title = parts[1].split("Description:")[0].strip().replace('*', '').replace('#','')
+        description = parts[1].split("Description:")[1].split("Story:")[0].strip().replace('*', '').replace('#','')
+        story = parts[1].split("Description:")[1].split("Story:")[1].strip().replace('*', '').replace('#','')
         stories.append({'story':story, 'title':title, 'description':description})
 
     return stories
 
 
-# stories = get_response(child_age=age, child_gender=gender, child_interests=interests, story_reading_time=reading_time, moral_of_the_story=moral, mode=mode, main_character_name=main_character_name)
-with open('stories.pickle', 'rb') as file:
-    stories = pickle.load(file)
+def change_sessison_state(name, status):
+    st.session_state[name] = status
+
+
+if not st.session_state['is_clicked_choose_story']:
+    with st.spinner("Generating stories..."):
+        stories = get_response(child_age=age, child_gender=gender, child_interests=interests, story_reading_time=reading_time, moral_of_the_story=moral, mode=mode, main_character_name=main_character_name, similar_story=similar_story)
+        # with open('stories.pickle', 'rb') as file:
+    #     stories = pickle.load(file)
+        st.session_state['stories'] = stories
 
 
 fill_color = "rgba(255, 255, 255, 0.5)"  
 col1, col2, col3 = st.columns([1,1,1])  
-max_height = max(len(stories[i]['title'])+len(stories[i]['description']) for i in range(3))*0.9
+max_height = max(len(stories[i]['title'])+len(stories[i]['description']) for i in range(3))*0.95
 with col1:  
     st.markdown(f"""        
         <div style="border: 2px solid black; padding: 10px; margin: 10px; border-radius: 15px; background-color: {fill_color}; color: black; height: {max_height}px;">        
-            <p style="font-weight: bold; font-size: 26px; text-align: center;">{stories[0]['title'].replace('**','').replace('###','')}</p>    
-            <p style="font-size: 15px;">{stories[0]['description'].replace('**','').replace('###','')}</p>    
+            <p style="font-weight: bold; font-size: 26px; text-align: center;">{stories[0]['title'].replace('**','').replace('#','')}</p>    
+            <p style="font-size: 15px;">{stories[0]['description'].replace('*','').replace('#','')}</p>    
         </div>    
         """, unsafe_allow_html=True)   
-    is_story_1_clicked = st.button("1")  
+    is_story_1_clicked = st.button("1", on_click=change_sessison_state, args=['is_story_1_clicked', True])
+
 with col2:  
     st.markdown(f"""        
         <div style="border: 2px solid black; padding: 10px; margin: 10px; border-radius: 15px; background-color: {fill_color}; color: black; height: {max_height}px;">        
-            <p style="font-weight: bold; font-size: 26px; text-align: center;">{stories[1]['title'].replace('**','').replace('###','')}</p>    
-            <p style="font-size: 15px;">{stories[1]['description'].replace('**','').replace('###','')}</p>    
+            <p style="font-weight: bold; font-size: 26px; text-align: center;">{stories[1]['title'].replace('**','').replace('#','')}</p>    
+            <p style="font-size: 15px;">{stories[1]['description'].replace('*','').replace('#','')}</p>    
         </div>    
         """, unsafe_allow_html=True)   
-    is_story_2_clicked = st.button("2")  
+    is_story_2_clicked = st.button("2", on_click=change_sessison_state, args=['is_story_2_clicked', True])
+    
 with col3:  
     st.markdown(f"""        
         <div style="border: 2px solid black; padding: 10px; margin: 10px; border-radius: 15px; background-color: {fill_color}; color: black; height: {max_height}px;">        
             <p style="font-weight: bold; font-size: 26px; text-align: center;">{stories[2]['title'].replace('**','').replace('###','')}</p>    
-            <p style="font-size: 15px; color: black;">{stories[2]['description'].replace('**','').replace('###','')}</p>  
+            <p style="font-size: 15px; color: black;">{stories[2]['description'].replace('*','').replace('#','')}</p>  
         </div>    
         """, unsafe_allow_html=True)    
-    is_story_3_clicked = st.button("3") 
+    is_story_3_clicked = st.button("3", on_click=change_sessison_state, args=['is_story_3_clicked', True]) 
 
-
-if is_story_1_clicked:
-    pass
-if is_story_2_clicked:
-    pass
-if is_story_3_clicked:
-    pass

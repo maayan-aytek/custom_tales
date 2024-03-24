@@ -14,11 +14,11 @@ set_button(buttons_right="-215", margin_top="0")
 
 name = st.session_state['NAME']
 
-col1, col2, col3 = st.columns([0.32, 0.6, 0.01])
+col1, col2, col3 = st.columns([0.36, 0.6, 0.01])
 with col1:
     st.write("")
 with col2:
-    st.title(f"Hey {name}!")
+    st.title(f"Hi {name}!")
 with col3:
     st.write("")
 
