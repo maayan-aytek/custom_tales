@@ -81,7 +81,7 @@ def update_story(chosen_story):
     #     def generate_voice(story):  
     #         parts = split_text_into_parts(story)  
     #         output_array = []  
-            
+              
     #         for part in parts:  
     #             inputs = processor(text=part, return_tensors="pt").to(device)  
     #             with torch.no_grad():  

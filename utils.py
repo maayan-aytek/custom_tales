@@ -1,7 +1,7 @@
 import base64
-import streamlit as st 
-import json 
-import openai 
+import streamlit as st
+import json
+import openai
 import pandas as pd
 
 @st.cache_resource
