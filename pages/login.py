@@ -9,7 +9,7 @@ st.set_page_config(layout="centered",
                     page_title="CustomTales",
                     page_icon=f'photos/logo.png')
 set_background(rf'photos/background.png')
-set_logo()
+set_logo(logo_width=40, margin_left=170)
 set_button(buttons_right="-217", margin_top="50")
 set_text_input()
 db = get_db_connection()

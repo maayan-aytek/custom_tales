@@ -10,7 +10,7 @@ st.set_page_config(layout="centered",
                     page_icon=f'photos/logo.png')
 
 set_background(rf'photos/background.png')
-set_logo()
+set_logo(logo_width=40, margin_left=180)
 set_button(buttons_right="-215", margin_top="0")
 col1, col2, col3 = st.columns([0.09, 0.8, 0.11])
 with col1:

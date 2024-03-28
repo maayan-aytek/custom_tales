@@ -1,6 +1,4 @@
 import streamlit as st
-import json
-from google.cloud import firestore
 from utils import *
 from streamlit_extras.switch_page_button import switch_page
 
@@ -10,8 +8,8 @@ st.set_page_config(layout="centered",
                     page_icon=f'photos/logo.png')
 
 set_background(rf'photos/background.png')
-set_logo(logo_width="20", margin_left="800", margin_bottom="-170")
-set_button(buttons_right="-260", margin_top="50")
+set_logo(logo_width="20", margin_left="800", margin_bottom="-270")
+set_button(buttons_right="-270", margin_top="20")
 set_text_input(width="350", margin_bottom="-30")
 set_number_input(width="20", margin_bottom="-5")
 set_selectbox_input(width="350", margin_bottom="-5")

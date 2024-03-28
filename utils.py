@@ -6,8 +6,6 @@ import openai
 import pandas as pd
 from transformers import SpeechT5Processor, SpeechT5ForTextToSpeech, SpeechT5HifiGan
 from datasets import load_dataset
-import soundfile as sf
-import sounddevice as sd
 import torch
 
 @st.cache_resource

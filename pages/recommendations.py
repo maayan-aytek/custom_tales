@@ -16,13 +16,13 @@ col1, col2, col3 = st.columns([0.05,0.05,0.8])
 with col2:
     with stylable_container(
         "home",
-        css_styles = set_image_circle_button(b64_home_string, margin_left='-140', margin_top='-60'),
+        css_styles = set_image_circle_button(b64_home_string, margin_left='-130', margin_top='-50'),
     ):
         is_click_home = st.button(label='', key='button2')
         if is_click_home:
             switch_page('home')
 with col3:
-    set_logo(logo_width="13", top="-60", right="-10")
+    set_logo(logo_width="13", top="-60", right="-75")
 
 
 

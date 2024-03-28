@@ -1,6 +1,4 @@
 import streamlit as st
-import json
-from google.cloud import firestore
 from utils import *
 import pandas as pd 
 from streamlit_extras.switch_page_button import switch_page
@@ -14,21 +12,21 @@ set_background(rf'photos/background.png')
 set_text_input(width="280", margin_bottom="-30", margin_left='210')
 set_selectbox_input(width="280", margin_bottom="0", margin_left='210')
 
+
 b64_gen_story_string = set_image_porperties(path=rf'photos/generate_story_image.png', image_resize=0.105, x_padding=-10, y_padding=-13)
-# b64_back_string = set_image_porperties(path=rf'photos/back.png', image_resize=0.2, x_padding=-6, y_padding=-6)
 b64_home_string = set_image_porperties(path=rf'photos/home_button_image.png', image_resize=0.06, x_padding=-8, y_padding=-8)
 
 col1, col2, col3 = st.columns([0.05,0.05,0.8])
 with col2:
     with stylable_container(
         "home",
-        css_styles = set_image_circle_button(b64_home_string, margin_left='-230', margin_top='-90'),
+        css_styles = set_image_circle_button(b64_home_string, margin_left='-280', margin_top='-75'),
     ):
         is_click_home = st.button(label='', key='button2')
         if is_click_home:
             switch_page('home')
 with col3:
-    set_logo(margin_left="100", margin_bottom="-20")
+    set_logo(margin_bottom="-80", logo_width=20, top=-80, right=-240)
 
 
 
@@ -56,10 +54,10 @@ with col3:
 books_df = pd.read_csv('books_data.csv')
 user_name = st.session_state['USERNAME']
 reading_time = st.text_input("Reading Time (min)", placeholder="")
-moral = st.text_input("Moral", placeholder="E.g. Be kind")
+moral = st.text_input("Moral", help="""Examples:\n1. Be kind\n2. Believe in yourself\n3. Be Grateful for What You Have\n4. Never Judge a Book by its Cover\n5. Honesty is the Best Policy\n6. You only live once\n7. Never give up""")
 mode = st.selectbox("Mode", options=["Classic", "Creative", "Innovative"], placeholder="")
 main_character_name = st.text_input("Main Character Name", placeholder="", help="If not provided, the main character name will default to the child's name.")
-similar_story = st.selectbox("Story Inspiration", options=['Ignored'] + list(books_df['Name'].drop_duplicates().sort_values()), help="Select the story template or framework to use as a basis when creating a new story.\n\nIf you're unsure which template to choose, you can leave this field as 'ignored', and a new story will be created from scratch.")
+similar_story = st.selectbox("Story Inspiration", options=['Ignored'] + list(books_df['Name'].drop_duplicates().sort_values()), help="""Select the story template or framework to use as a basis when creating a new story.\n\nIf you're unsure which template to choose, you can leave this field as 'ignored', and a new story will be created from scratch.""")
 similar_story_description = "" if similar_story == "Ignored" else books_df[books_df['Name'] == similar_story]['Description'].values[0]
 
 with stylable_container(

@@ -1,19 +1,10 @@
 import streamlit as st
-import json
-from google.cloud import firestore
 from utils import *
-import pandas as pd 
-import openai
 from streamlit_extras.switch_page_button import switch_page
 from streamlit_extras.stylable_container import stylable_container
-import pickle
-import numpy as np
-from transformers import SpeechT5Processor, SpeechT5ForTextToSpeech, SpeechT5HifiGan
-from datasets import load_dataset
-import soundfile as sf
-import sounddevice as sd
-import torch
 import datetime
+import numpy as np
+import soundfile as sf
 
 LEADING_CHAR = '0'
 
@@ -27,13 +18,13 @@ col01, col02, col03 = st.columns([0.05,0.05,0.8])
 with col02:
     with stylable_container(
         "home",
-        css_styles = set_image_circle_button(b64_home_string, margin_left='-230', margin_top='-90'),
+        css_styles = set_image_circle_button(b64_home_string, margin_left='-270', margin_top='-60'),
     ):
         is_click_home = st.button(label='', key='button2')
         if is_click_home:
             switch_page('home')
 with col03:
-    set_logo(logo_width="15", margin_left="455", margin_bottom="0")
+    set_logo(logo_width="15", margin_left="335", margin_bottom="0")
 set_circle_button()
 
 
@@ -70,25 +61,25 @@ def update_story(chosen_story):
             f"stories.{title}": chosen_story,
         })
 
-    # with st.spinner('Loading story...'):
-    #     device, processor, model, vocoder, speaker_embeddings = get_speaker_instances()
+    with st.spinner('Loading story...'):
+        device, processor, model, vocoder, speaker_embeddings = get_speaker_instances()
         
-    #     def generate_voice(story):  
-    #         parts = split_text_into_parts(story)  
-    #         output_array = []  
+        def generate_voice(story):  
+            parts = split_text_into_parts(story)  
+            output_array = []  
               
-    #         for part in parts:  
-    #             inputs = processor(text=part, return_tensors="pt").to(device)  
-    #             with torch.no_grad():  
-    #                 generated_speech = model.generate_speech(inputs["input_ids"], speaker_embeddings, vocoder=vocoder)  
-    #                 generated_speech = generated_speech.cpu().numpy()  
-    #             output_array.append(generated_speech)  
+            for part in parts:  
+                inputs = processor(text=part, return_tensors="pt").to(device)  
+                with torch.no_grad():  
+                    generated_speech = model.generate_speech(inputs["input_ids"], speaker_embeddings, vocoder=vocoder)  
+                    generated_speech = generated_speech.cpu().numpy()  
+                output_array.append(generated_speech)  
         
-    #         speech = np.concatenate(output_array, axis=0)  
-    #         sf.write("tts_story.wav", speech.squeeze(), samplerate=17000)  
+            speech = np.concatenate(output_array, axis=0)  
+            sf.write("tts_story.wav", speech.squeeze(), samplerate=17000)  
         
-    #     story = chosen_story['title'] + chosen_story['story']
-    #     generate_voice(story)
+        story = chosen_story['title'] + chosen_story['story']
+        generate_voice(story)
         
     switch_page('full_story')
 
@@ -110,27 +101,19 @@ if st.session_state['is_story_3_clicked']:
     update_story(stories[2])
 
 def get_response(child_age, child_gender, child_interests, story_reading_time, moral_of_the_story, mode, main_character_name, similar_story, similar_story_description):
-    if similar_story != 'Ignored': 
-        prompt = f"""Generate children story suitable for a {child_age}-year-old {child_gender} child with interests in {child_interests}. 
-                The story should be around {story_reading_time} minutes long. The moral of the story should be '{moral_of_the_story}'.
-                The mode of the story should be {mode}. The main character of the story should be named '{main_character_name}'.
-                Please note that the story doesn't have to include all interests mentioned; it can choose to include only a subset of them.
-                Also, avoid mixing unrelated interests. If there are multiple interests provided, choose at random only one that fits the story context best.
-                The story should be inspired by '{similar_story} children book. Here is the book description: {similar_story_description}.'
-                ### Generate title: True
-                ### Generate description: True
-                ### Generate story: True
-                Your output must be in the following format: 
-                Title: ...
-                Description: ...
-                Story: ...
-                """
+    prompts = []
+    if similar_story != "Ignored":
+        similar_story_parts = [f"The story should be inspired by '{similar_story} children book. Here is the book description: {similar_story_description}.",
+                            f"{similar_story}' book is the inspiration, it should echo the essence of its plot without direct replication. Here is the book description: {similar_story_description},",
+                            f"{similar_story}' bookk aim to capture the story spirit and integrate it thoughtfully with a unique twist. Here is the book description: {similar_story_description}."]
     else:
-        prompt = f"""Generate children story suitable for a {child_age}-year-old {child_gender} child with interests in {child_interests}. 
+        similar_story_parts = ["", "", ""]
+    prompts.append(f"""Generate children story suitable for a {child_age}-year-old {child_gender} child with interests in {child_interests}. 
                     The story should be around {story_reading_time} minutes long. The moral of the story should be '{moral_of_the_story}'.
                     The mode of the story should be {mode}. The main character of the story should be named '{main_character_name}'.
                     Please note that the story doesn't have to include all interests mentioned; it can choose to include only a subset of them.
                     Also, avoid mixing unrelated interests. If there are multiple interests provided, choose at random only one that fits the story context best.
+                    {similar_story_parts[0]}
                     ### Generate title: True
                     ### Generate description: True
                     ### Generate story: True
@@ -138,18 +121,48 @@ def get_response(child_age, child_gender, child_interests, story_reading_time, m
                     Title: ...
                     Description: ...
                     Story: ...
-                    """
-    completion = openAI_client.chat.completions.create(
-        model="gpt-3.5-turbo",
-        messages=[
-            {"role": "system", "content": "You're a story generator tasked with creating captivating children's stories tailored to individual preferences."},
-            {"role": "user", "content": prompt},
-        ],
-        n=3,
-    )
+                    """)
+    prompts.append(f"""Craft a tale for a {child_age}-year-old {child_gender} interested in {child_interests}. 
+                    This narrative should unfold over approximately {story_reading_time} minutes. 
+                    Central to the story is the moral '{moral_of_the_story}', which should be seamlessly woven into the plot. 
+                    The narrative style is to be {mode}, and the protagonist, named '{main_character_name}', should embody the story's essence. 
+                    While the story may draw from the child's interests, it should focus on a primary theme to maintain coherence. 
+                    {similar_story_parts[1]}
+                    ### Generate title: True
+                    ### Generate description: True
+                    ### Generate story: True
+                    Your output must be in the following format: 
+                    Title: ...
+                    Description: ...
+                    Story: ...
+                    """)
+    prompts.append(f"""Create a story appropriate for a {child_age}-year-old {child_gender}, with a spotlight on {child_interests}. 
+                    The duration of the story should be close to {story_reading_time} minutes. 
+                    Importantly, the storyline should impart the lesson '{moral_of_the_story}', and be presented in a {mode} manner.
+                    '{main_character_name}' should lead the narrative as the principal character. While the tale can tap into various interests,
+                    it should primarily revolve around one to ensure a unified theme. 
+                    {similar_story_parts[2]}
+                    ### Generate title: True
+                    ### Generate description: True
+                    ### Generate story: True
+                    Your output must be in the following format: 
+                    Title: ...
+                    Description: ...
+                    Story: ...
+                    """)
+    outputs = []
+    for i in range(3):
+        completion = openAI_client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You're a story generator tasked with creating captivating children's stories tailored to individual preferences."},
+                {"role": "user", "content": prompts[i]},
+            ],
+        )
+        outputs.append(completion.choices[0])
 
     stories = []
-    for choice in completion.choices:
+    for choice in outputs:
         generated_content = choice.message.content
         print("-----------")
         print(generated_content)
@@ -163,7 +176,7 @@ def get_response(child_age, child_gender, child_interests, story_reading_time, m
             split_by = '\n\n'
         title = parts[1].split("Description:")[0].strip().replace('*', '').replace('#','')
         description = parts[1].split("Description:")[1].split(split_by)[0].strip().replace('*', '').replace('#','')
-        story = parts[1].split(description)[1].strip().replace('Story: ', '').replace('*', '').replace('#','')
+        story = parts[1].split(description)[1].replace('Story:', '').replace('*', '').replace('#','').strip()
         stories.append({'story':story, 'title':title, 'description':description})
 
     return stories
@@ -175,10 +188,8 @@ def change_sessison_state(name, status):
 
 if not st.session_state['is_clicked_choose_story']:
     with st.spinner("Generating stories..."):
-        # stories = get_response(child_age=age, child_gender=gender, child_interests=interests, story_reading_time=reading_time, moral_of_the_story=moral,
-        #                         mode=mode, main_character_name=main_character_name, similar_story=similar_story_title, similar_story_description=similar_story_description)
-        with open('stories.pickle', 'rb') as file:
-            stories = pickle.load(file)
+        stories = get_response(child_age=age, child_gender=gender, child_interests=interests, story_reading_time=reading_time, moral_of_the_story=moral,
+                                mode=mode, main_character_name=main_character_name, similar_story=similar_story_title, similar_story_description=similar_story_description)
         st.session_state['stories'] = stories
 
 if st.session_state['stories']:

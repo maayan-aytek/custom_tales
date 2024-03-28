@@ -8,8 +8,8 @@ st.set_page_config(layout="centered",
                     page_icon=f'photos/logo.png')
 
 set_background(rf'photos/background.png')
-set_logo(logo_width=35, margin_bottom="-30", margin_left="210")
-set_button(buttons_right="-230", margin_top="0")
+set_logo(logo_width=30, margin_bottom="-30", margin_left="245")
+set_button(buttons_right="-250", margin_top="0")
 
 st.markdown(" Welcome to Custom Tales! An interactive storytelling platform, where creativity meets personalization.\n")
 st.write(

@@ -15,7 +15,7 @@ st.set_page_config(layout="wide",
                     page_title="CustomTales",
                     page_icon=f'photos/logo.png')
 set_background(rf'photos/background.png')
-set_selectbox_input(width="280", margin_bottom="0", margin_left='210')
+set_selectbox_input(width="280", margin_left='30')
 set_button(buttons_right="-245", margin_top="20")
 set_tabs()
 db = get_db_connection()
@@ -27,13 +27,13 @@ col1, col2, col3 = st.columns([0.05,0.05,0.8])
 with col2:
     with stylable_container(
         "home",
-        css_styles = set_image_circle_button(b64_home_string, margin_left='-230', margin_top='-90'),
+        css_styles = set_image_circle_button(b64_home_string, margin_left='-370', margin_top='-95'),
     ):
         is_click_home = st.button(label='', key='button2')
         if is_click_home:
             switch_page('home')
 with col3:
-    set_logo(margin_left="600", margin_bottom="-20", logo_width=15)
+    set_logo(right=-60, top=-100, margin_bottom="-80", logo_width=15)
 
 user_name = st.session_state['USERNAME']
 db_ref = db.collection("users").document(user_name)
@@ -54,31 +54,31 @@ def plot_weekly_histogram(doc_dict):
     fig.update_layout(
         title={
             'text': "My Weekly Readings Progress",
-            'y':0.9,  # Title position from top
-            'x':0.5,  # Title position from left
-            'xanchor': 'center',  # Anchor point for x position
-            'yanchor': 'top',  # Anchor point for y position
-            'font':dict(color="white")  # Set title font color to white
+            'y':0.9,
+            'x':0.5,  
+            'xanchor': 'center', 
+            'yanchor': 'top', 
+            'font':dict(color="white")
         },
         xaxis=dict(
             title="End Of Week",
-            tickvals=last_dates_of_week,  # Set tick values to the last date of each week
-            tickangle=45,  # Rotate the tick labels for better readability
-            tickfont=dict(color="white"),  # Set tick font color to white
+            tickvals=last_dates_of_week,
+            tickangle=45,
+            tickfont=dict(color="white"), 
             titlefont=dict(color="white"),
             showgrid=False,
         ),
         yaxis=dict(
             title="Counts",
-            tickcolor="white",  # Set tick color to white
-            tickfont=dict(color="white"),  # Set tick font color to white
+            tickcolor="white",  
+            tickfont=dict(color="white"), 
             titlefont=dict(color="white"), 
             showgrid=False,
         ),
         bargap=0.15,  # Gap between bars
         plot_bgcolor="rgba(0,0,0,0)",  # Transparent background
         paper_bgcolor="rgba(0,0,0,0)", 
-        width = 500
+        width = 300
     )
 
     st.plotly_chart(fig)
@@ -106,20 +106,19 @@ def plot_favorite_story_mode(doc_dict):
         plot_bgcolor="rgba(0,0,0,0)", 
         paper_bgcolor="rgba(0,0,0,0)",  
         legend=dict(
-            x=0.73, 
-            y=0.5, 
             xanchor="left",
             yanchor="middle",
             font=dict(color="white") 
         ),
         title=dict(
             text="Favorite Story Mode", 
-            x=0.5, 
+            x=0.4, 
             y=0.9,  
             xanchor='center', 
             yanchor='top',  
             font=dict(color="white")
         ),
+        width=400
     )
     
     st.plotly_chart(fig)
@@ -140,10 +139,11 @@ def plot_most_frequent_morals(doc_dict, top_n=5):
     morals_list = [moral[0] for moral in top_morals]
     counts_list = [moral[1] for moral in top_morals]
     moral_df = pd.DataFrame({'Moral': morals_list, 'Count': counts_list})
+    moral_df.index += 1
     st.markdown(
     f"""
-    <div style='margin-top: 36px;'>
-        <p style='color: white; font-weight:bold;'>Top Most Frequent Morals</p>
+    <div style='margin-top: 36px; text-align: center'>
+        <p style='color: white; font-weight:bold;'>Top {top_n} Most Frequent Morals</p>
     </div>
     """,
     unsafe_allow_html=True
@@ -163,7 +163,7 @@ def restore_story(doc_dict):
 
     st.markdown(
         f"""
-        <div style='position: absolute; top: 10px; left: 185px;'>
+        <div >
             <p style='color: white; font-weight: bold;'>🔎 Search The Title To Restore The Full Story:</p>
         </div>
         """,
@@ -203,15 +203,15 @@ def restore_story(doc_dict):
 
 stats_tab, restore_story_tab = st.tabs(['Statistics', 'Restore Story'])   
 with stats_tab:
-    col1, col2, col3, col4, col5 = st.columns([0.2, 1.6,0.8,1.1, 0.7])
-    with col2:
+    col1, col2, col3 = st.columns([0.9, 1, 1])
+    with col1:
         plot_weekly_histogram(doc_dict)
-    with col3:
+    with col2:
         plot_most_frequent_morals(doc_dict, top_n=5)
-    with col4:
+    with col3:
         plot_favorite_story_mode(doc_dict)
 
 with restore_story_tab:
     col1, col2, col3 = st.columns([1,1,1.2])
     with col2:
-     restore_story(doc_dict)
+        restore_story(doc_dict)
