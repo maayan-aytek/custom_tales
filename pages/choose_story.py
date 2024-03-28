@@ -49,7 +49,8 @@ reading_time = st.session_state['story_details']['reading_time']
 moral = st.session_state['story_details']['moral']
 mode = st.session_state['story_details']['mode']
 main_character_name = st.session_state['story_details']['main_character_name']
-similar_story = st.session_state['story_details']['similar_story']
+similar_story_title = st.session_state['story_details']['similar_story']
+similar_story_description = st.session_state['story_details']['similar_story_description']
 
 
 def update_story(chosen_story):
@@ -70,13 +71,7 @@ def update_story(chosen_story):
         })
 
     # with st.spinner('Loading story...'):
-    #     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")  
-    #     processor = SpeechT5Processor.from_pretrained("microsoft/speecht5_tts") 
-    #     model = SpeechT5ForTextToSpeech.from_pretrained("microsoft/speecht5_tts").to(device)  
-    #     vocoder = SpeechT5HifiGan.from_pretrained("microsoft/speecht5_hifigan").to(device)  
-    #     embeddings_dataset = load_dataset("Matthijs/cmu-arctic-xvectors", split="validation")  
-    #     speaker_embeddings = torch.tensor(embeddings_dataset[7306]["xvector"]).unsqueeze(0).to(device)  
-
+    #     device, processor, model, vocoder, speaker_embeddings = get_speaker_instances()
         
     #     def generate_voice(story):  
     #         parts = split_text_into_parts(story)  
@@ -95,7 +90,6 @@ def update_story(chosen_story):
     #     story = chosen_story['title'] + chosen_story['story']
     #     generate_voice(story)
         
-    st.write("in updating story")
     switch_page('full_story')
 
 
@@ -115,17 +109,21 @@ if st.session_state['is_story_3_clicked']:
     stories = st.session_state['stories']
     update_story(stories[2])
 
-def get_response(child_age, child_gender, child_interests, story_reading_time, moral_of_the_story, mode, main_character_name, similar_story):
+def get_response(child_age, child_gender, child_interests, story_reading_time, moral_of_the_story, mode, main_character_name, similar_story, similar_story_description):
     if similar_story != 'Ignored': 
         prompt = f"""Generate children story suitable for a {child_age}-year-old {child_gender} child with interests in {child_interests}. 
                 The story should be around {story_reading_time} minutes long. The moral of the story should be '{moral_of_the_story}'.
                 The mode of the story should be {mode}. The main character of the story should be named '{main_character_name}'.
                 Please note that the story doesn't have to include all interests mentioned; it can choose to include only a subset of them.
                 Also, avoid mixing unrelated interests. If there are multiple interests provided, choose at random only one that fits the story context best.
-                The story should be inspired by '{similar_story} children book.'
+                The story should be inspired by '{similar_story} children book. Here is the book description: {similar_story_description}.'
                 ### Generate title: True
                 ### Generate description: True
                 ### Generate story: True
+                Your output must be in the following format: 
+                Title: ...
+                Description: ...
+                Story: ...
                 """
     else:
         prompt = f"""Generate children story suitable for a {child_age}-year-old {child_gender} child with interests in {child_interests}. 
@@ -136,6 +134,10 @@ def get_response(child_age, child_gender, child_interests, story_reading_time, m
                     ### Generate title: True
                     ### Generate description: True
                     ### Generate story: True
+                    Your output must be in the following format: 
+                    Title: ...
+                    Description: ...
+                    Story: ...
                     """
     completion = openAI_client.chat.completions.create(
         model="gpt-3.5-turbo",
@@ -153,10 +155,15 @@ def get_response(child_age, child_gender, child_interests, story_reading_time, m
         print(generated_content)
         # Split generated content into story, title, and description
         parts = generated_content.split("Title:")
-        split_by = 'Story:' if 'Story:' in parts[1].split("Description:")[1] else '<br/>'
+        if 'Story:' in parts[1].split("Description:")[1]:
+            split_by = 'Story:'
+        elif '<br/>' in parts[1].split("Description:")[1]:
+            split_by = '<br/>'
+        else:
+            split_by = '\n\n'
         title = parts[1].split("Description:")[0].strip().replace('*', '').replace('#','')
         description = parts[1].split("Description:")[1].split(split_by)[0].strip().replace('*', '').replace('#','')
-        story = parts[1].split("Description:")[1].split(split_by)[1].strip().replace('*', '').replace('#','')
+        story = parts[1].split(description)[1].strip().replace('Story: ', '').replace('*', '').replace('#','')
         stories.append({'story':story, 'title':title, 'description':description})
 
     return stories
@@ -168,9 +175,10 @@ def change_sessison_state(name, status):
 
 if not st.session_state['is_clicked_choose_story']:
     with st.spinner("Generating stories..."):
-        stories = get_response(child_age=age, child_gender=gender, child_interests=interests, story_reading_time=reading_time, moral_of_the_story=moral, mode=mode, main_character_name=main_character_name, similar_story=similar_story)
-        # with open('stories.pickle', 'rb') as file:
-    #     stories = pickle.load(file)
+        # stories = get_response(child_age=age, child_gender=gender, child_interests=interests, story_reading_time=reading_time, moral_of_the_story=moral,
+        #                         mode=mode, main_character_name=main_character_name, similar_story=similar_story_title, similar_story_description=similar_story_description)
+        with open('stories.pickle', 'rb') as file:
+            stories = pickle.load(file)
         st.session_state['stories'] = stories
 
 if st.session_state['stories']:

@@ -1,8 +1,14 @@
+from transformers import AutoTokenizer, AutoModel
 import base64
 import streamlit as st
 import json
 import openai
 import pandas as pd
+from transformers import SpeechT5Processor, SpeechT5ForTextToSpeech, SpeechT5HifiGan
+from datasets import load_dataset
+import soundfile as sf
+import sounddevice as sd
+import torch
 
 @st.cache_resource
 def get_openAI_client():
@@ -333,3 +339,62 @@ def format_table(df,
     #set styles and foramts
     styled_df = df_style.set_table_styles(styles).format(formatter=formatter, precision=precision, na_rep=na_rep, thousands=",", **kwarg)
     return styled_df
+
+def set_tabs():
+    st.markdown("""
+    <style>
+
+        .stTabs [data-baseweb="tab-list"] {
+            gap: 15px;
+            color: white;
+        }
+
+        .stTabs [data-baseweb="tab"] {
+            border-radius: 4px 4px 0px 0px;
+            color: white;
+        }
+
+        .stTabs [aria-selected="true"] {
+            color: white;
+        }
+                
+        .stTabs [data-baseweb="tab-highlight"] {
+            background-color:white;
+        }
+
+    </style>""", unsafe_allow_html=True)
+
+@st.cache_resource
+def get_speaker_instances():
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")  
+    processor = SpeechT5Processor.from_pretrained("microsoft/speecht5_tts") 
+    model = SpeechT5ForTextToSpeech.from_pretrained("microsoft/speecht5_tts").to(device)  
+    vocoder = SpeechT5HifiGan.from_pretrained("microsoft/speecht5_hifigan").to(device)  
+    embeddings_dataset = load_dataset("Matthijs/cmu-arctic-xvectors", split="validation")  
+    speaker_embeddings = torch.tensor(embeddings_dataset[7306]["xvector"]).unsqueeze(0).to(device)  
+    return device, processor, model, vocoder, speaker_embeddings
+
+
+
+def mean_pooling(model_output, attention_mask):
+    token_embeddings = model_output[0] #First element of model_output contains all token embeddings
+    input_mask_expanded = attention_mask.unsqueeze(-1).expand(token_embeddings.size()).float()
+    return torch.sum(token_embeddings * input_mask_expanded, 1) / torch.clamp(input_mask_expanded.sum(1), min=1e-9)
+
+def text_to_embedding(text):
+    tokenizer = AutoTokenizer.from_pretrained('sentence-transformers/bert-base-nli-mean-tokens')
+    model = AutoModel.from_pretrained('sentence-transformers/bert-base-nli-mean-tokens')
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model.to(device)
+    inputs = tokenizer(text, return_tensors='pt', truncation=True, max_length=512)
+    
+    if 'overflowing_tokens' in inputs:
+        print(f"Warning: Input sequence length exceeded maximum length. Truncating sequence for text: {text}")
+    
+    inputs.to(device)
+    with torch.no_grad():
+        outputs = model(**inputs)
+    
+    sentence_embeddings = mean_pooling(outputs, inputs['attention_mask'])
+    return sentence_embeddings.cpu().numpy()
+    

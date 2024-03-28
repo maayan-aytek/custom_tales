@@ -1,23 +1,10 @@
-import torch
 import streamlit as st
 from utils import *
 import pandas as pd 
 from streamlit_extras.switch_page_button import switch_page
 from streamlit_extras.stylable_container import stylable_container
-from transformers import AutoTokenizer, AutoModel
 from sklearn.metrics.pairwise import cosine_similarity
 
-
-def mean_pooling(model_output, attention_mask):
-    token_embeddings = model_output[0] #First element of model_output contains all token embeddings
-    input_mask_expanded = attention_mask.unsqueeze(-1).expand(token_embeddings.size()).float()
-    return torch.sum(token_embeddings * input_mask_expanded, 1) / torch.clamp(input_mask_expanded.sum(1), min=1e-9)
-
-
-tokenizer = AutoTokenizer.from_pretrained('sentence-transformers/bert-base-nli-mean-tokens')
-model = AutoModel.from_pretrained('sentence-transformers/bert-base-nli-mean-tokens')
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-model.to(device)
 
 st.set_page_config(layout="wide",
                    initial_sidebar_state="collapsed",
@@ -36,21 +23,6 @@ with col2:
             switch_page('home')
 with col3:
     set_logo(logo_width="13", top="-60", right="-10")
-
-
-
-def text_to_embedding(text):
-    inputs = tokenizer(text, return_tensors='pt', truncation=True, max_length=512)
-    
-    if 'overflowing_tokens' in inputs:
-        print(f"Warning: Input sequence length exceeded maximum length. Truncating sequence for text: {text}")
-    
-    inputs.to(device)
-    with torch.no_grad():
-        outputs = model(**inputs)
-    
-    sentence_embeddings = mean_pooling(outputs, inputs['attention_mask'])
-    return sentence_embeddings.cpu().numpy()
 
 
 

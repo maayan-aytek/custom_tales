@@ -1,27 +1,23 @@
 import streamlit as st
-import json
-from google.cloud import firestore
 from utils import *
 import pandas as pd 
-import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 from collections import Counter
 from datetime import datetime, timedelta
 from streamlit_extras.switch_page_button import switch_page
 from streamlit_extras.stylable_container import stylable_container
-# from transformers import SpeechT5Processor, SpeechT5ForTextToSpeech, SpeechT5HifiGan
-# from datasets import load_dataset
-# import soundfile as sf
-# import sounddevice as sd
-# import torch
+import soundfile as sf
+import torch
+import numpy as np
 
 st.set_page_config(layout="wide",
                    initial_sidebar_state="collapsed",
                     page_title="CustomTales",
                     page_icon=f'photos/logo.png')
 set_background(rf'photos/background.png')
-set_selectbox_input(width="280", margin_bottom="0", margin_left='210', font_color='white')
+set_selectbox_input(width="280", margin_bottom="0", margin_left='210')
 set_button(buttons_right="-245", margin_top="20")
+set_tabs()
 db = get_db_connection()
 
 b64_gen_story_string = set_image_porperties(path=rf'photos/generate_story_image.png', image_resize=0.105, x_padding=-10, y_padding=-13)
@@ -39,14 +35,11 @@ with col2:
 with col3:
     set_logo(margin_left="600", margin_bottom="-20", logo_width=15)
 
-# user_name = st.session_state['USER_NAME']
-user_name = 'ordado4'
+user_name = st.session_state['USERNAME']
 db_ref = db.collection("users").document(user_name)
 doc_dict = db_ref.get().to_dict()
 
  
-
-
 def plot_weekly_histogram(doc_dict):
     dates = []
     stories_dict = doc_dict['stories']
@@ -159,33 +152,7 @@ def plot_most_frequent_morals(doc_dict, top_n=5):
     st.write('')
     styled_dataset_embeddings = format_table(moral_df, cell_hover=False, cells_props = [('font-size', '14px'), ('text-align', 'center'), ('color', 'white')])
     st.table(styled_dataset_embeddings)
-    # # Create table trace
-    # table_trace = go.Table(
-    #     header=dict(values=['Moral', 'Count'],
-    #                 fill_color='paleturquoise',
-    #                 align='left'),
-    #     cells=dict(values=[morals_list, counts_list],
-    #                fill_color='lavender',
-    #                align='left')
-    # )
-
-    # layout = dict(
-    #     title=dict(
-    #         text='Top {} Most Frequent Morals'.format(top_n),
-    #         x=0.5, 
-    #         y=0.9,
-    #         xanchor='center',  
-    #         yanchor='top',  
-    #         font=dict(color="white")
-    #     ),
-    #     plot_bgcolor="rgba(0,0,0,0)",  
-    #     paper_bgcolor="rgba(0,0,0,0)",
-    #     width = 350,
-    # )
-
-    # fig = go.Figure(data=[table_trace], layout=layout)
-    # st.plotly_chart(fig)
-
+   
 def restore_story(doc_dict):
     titles = []
     stories = []
@@ -211,67 +178,28 @@ def restore_story(doc_dict):
             chosen_story = {'title':selected_title, 'story': selected_story}
             st.session_state['chosen_story'] = chosen_story
         
-            # with st.spinner('Loading story...'):
-            #     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")  
-            #     processor = SpeechT5Processor.from_pretrained("microsoft/speecht5_tts") 
-            #     model = SpeechT5ForTextToSpeech.from_pretrained("microsoft/speecht5_tts").to(device)  
-            #     vocoder = SpeechT5HifiGan.from_pretrained("microsoft/speecht5_hifigan").to(device)  
-            #     embeddings_dataset = load_dataset("Matthijs/cmu-arctic-xvectors", split="validation")  
-            #     speaker_embeddings = torch.tensor(embeddings_dataset[7306]["xvector"]).unsqueeze(0).to(device)  
-
+            with st.spinner('Loading story...'):
+                device, processor, model, vocoder, speaker_embeddings = get_speaker_instances()
                 
-            #     def generate_voice(story):  
-            #         parts = split_text_into_parts(story)  
-            #         output_array = []  
+                def generate_voice(story):  
+                    parts = split_text_into_parts(story)  
+                    output_array = []  
                     
-            #         for part in parts:  
-            #             inputs = processor(text=part, return_tensors="pt").to(device)  
-            #             with torch.no_grad():  
-            #                 generated_speech = model.generate_speech(inputs["input_ids"], speaker_embeddings, vocoder=vocoder)  
-            #                 generated_speech = generated_speech.cpu().numpy()  
-            #             output_array.append(generated_speech)  
+                    for part in parts:  
+                        inputs = processor(text=part, return_tensors="pt").to(device)  
+                        with torch.no_grad():  
+                            generated_speech = model.generate_speech(inputs["input_ids"], speaker_embeddings, vocoder=vocoder)  
+                            generated_speech = generated_speech.cpu().numpy()  
+                        output_array.append(generated_speech)  
                 
-            #         speech = np.concatenate(output_array, axis=0)  
-            #         sf.write("tts_story.wav", speech.squeeze(), samplerate=17000)  
+                    speech = np.concatenate(output_array, axis=0)  
+                    sf.write("tts_story.wav", speech.squeeze(), samplerate=17000)  
                 
-            #     story = chosen_story['title'] + chosen_story['story']
-            #     generate_voice(story)
+                story = chosen_story['title'] + chosen_story['story']
+                generate_voice(story)
 
             switch_page('full_story')
-
-
-# tab1, tab2, tab3, tab4 = st.tabs(["dfgdf", "dfgdfg", "dfgdfg", "dfgdf"])
-# with tab1:
-#     plot_weekly_histogram(doc_dict)
-# with tab2:
-#     plot_favorite_story_mode(doc_dict)
-# with tab3:
-#     plot_most_frequent_morals(doc_dict, top_n=5)
-# with tab4:
-#     restore_story(doc_dict)
             
-st.markdown("""
-<style>
-
-	.stTabs [data-baseweb="tab-list"] {
-		gap: 15px;
-        color: white;
-    }
-
-	.stTabs [data-baseweb="tab"] {
-		border-radius: 4px 4px 0px 0px;
-        color: white;
-    }
-
-	.stTabs [aria-selected="true"] {
-  		color: white;
-	}
-            
-    .stTabs [data-baseweb="tab-highlight"] {
-        background-color:white;
-    }
-
-</style>""", unsafe_allow_html=True)
 
 stats_tab, restore_story_tab = st.tabs(['Statistics', 'Restore Story'])   
 with stats_tab:

@@ -55,7 +55,7 @@ password = st.text_input("password", type="password", placeholder="", help="""Pa
 name = st.text_input("Name", placeholder="")
 gender = st.selectbox("Gender", options=["Male", "Female", "Prefer not to say"], placeholder="")
 age = st.text_input("Age", placeholder="")
-interests = st.text_input("Interests", placeholder="E.g: football, science, princesses, cars, painting...")
+interests = st.text_input("Interests", placeholder="E.g: football, science, princesses, cars, painting...", help="Enter your child's interests separated by commas. You can write one or multiple interests.")
 
 is_click_register = st.button("# Register")
 if is_click_register:

@@ -54,13 +54,13 @@ with col3:
 
 
 books_df = pd.read_csv('books_data.csv')
-
 user_name = st.session_state['USERNAME']
 reading_time = st.text_input("Reading Time (min)", placeholder="")
 moral = st.text_input("Moral", placeholder="E.g. Be kind")
 mode = st.selectbox("Mode", options=["Classic", "Creative", "Innovative"], placeholder="")
 main_character_name = st.text_input("Main Character Name", placeholder="", help="If not provided, the main character name will default to the child's name.")
 similar_story = st.selectbox("Story Inspiration", options=['Ignored'] + list(books_df['Name'].drop_duplicates().sort_values()), help="Select the story template or framework to use as a basis when creating a new story.\n\nIf you're unsure which template to choose, you can leave this field as 'ignored', and a new story will be created from scratch.")
+similar_story_description = "" if similar_story == "Ignored" else books_df[books_df['Name'] == similar_story]['Description'].values[0]
 
 with stylable_container(
     "generate_story",
@@ -76,6 +76,7 @@ if is_click_generate_story:
                                             'mode': mode,
                                             'main_character_name': st.session_state['NAME'] if main_character_name == '' else main_character_name,
                                             'similar_story': similar_story,
+                                            'similar_story_description': similar_story_description
                                             }
         st.session_state['is_story_1_clicked'] = False
         st.session_state['is_story_2_clicked'] = False
