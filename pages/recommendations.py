@@ -57,5 +57,8 @@ filtered_df = dataset_embeddings[
 ]
 
 filterd_df = filtered_df.sort_values('Similarity', ascending=False)
-styled_dataset_embeddings = format_table(filterd_df[['Book Description', 'Age', 'Price ($)', 'Average Rating (Out Of 5)', 'Number Of Ratings']].rename(columns={'Average Rating (Out Of 5)':'Average Rating ⭐⭐⭐', 'Number Of Ratings': '#Ratings'}).head(3), cell_hover=False)
+filterd_df['Similarity'] = (filterd_df['Similarity'].astype(float)*100).astype(int)
+styled_dataset_embeddings = format_table(filterd_df[['Book Description', 'Age', 'Price ($)', 'Average Rating (Out Of 5)', 'Number Of Ratings', 'Similarity']].rename(columns={'Average Rating (Out Of 5)':'Average Rating ⭐⭐⭐', 'Number Of Ratings': '#Ratings', 'Similarity':'Matching Score (%)'}).head(3))
+col1, col2 = st.columns([1,1])
+st.markdown('<div style="margin-right: 1000px; top: -100px;"></div>',help="The 'matching score' rates how closely your story matches children's books in our collection on a scale of 0 to 100%.\nHigher scores mean closer alignment.", unsafe_allow_html=True)
 st.table(styled_dataset_embeddings)

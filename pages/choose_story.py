@@ -114,9 +114,6 @@ def get_response(child_age, child_gender, child_interests, story_reading_time, m
                     Please note that the story doesn't have to include all interests mentioned; it can choose to include only a subset of them.
                     Also, avoid mixing unrelated interests. If there are multiple interests provided, choose at random only one that fits the story context best.
                     {similar_story_parts[0]}
-                    ### Generate title: True
-                    ### Generate description: True
-                    ### Generate story: True
                     Your output must be in the following format: 
                     Title: ...
                     Description: ...
@@ -128,9 +125,6 @@ def get_response(child_age, child_gender, child_interests, story_reading_time, m
                     The narrative style is to be {mode}, and the protagonist, named '{main_character_name}', should embody the story's essence. 
                     While the story may draw from the child's interests, it should focus on a primary theme to maintain coherence. 
                     {similar_story_parts[1]}
-                    ### Generate title: True
-                    ### Generate description: True
-                    ### Generate story: True
                     Your output must be in the following format: 
                     Title: ...
                     Description: ...
@@ -142,9 +136,6 @@ def get_response(child_age, child_gender, child_interests, story_reading_time, m
                     '{main_character_name}' should lead the narrative as the principal character. While the tale can tap into various interests,
                     it should primarily revolve around one to ensure a unified theme. 
                     {similar_story_parts[2]}
-                    ### Generate title: True
-                    ### Generate description: True
-                    ### Generate story: True
                     Your output must be in the following format: 
                     Title: ...
                     Description: ...
@@ -195,8 +186,15 @@ if not st.session_state['is_clicked_choose_story']:
 if st.session_state['stories']:
     stories = st.session_state['stories']
     fill_color = "rgba(255, 255, 255, 0.5)"  
-    col1, col2, col3 = st.columns([1,1,1])  
-    max_height = max(len(stories[i]['title'])+len(stories[i]['description']) for i in range(3))*0.95
+    col1, col2, col3 = st.columns([1,1,1])
+    long_title = False
+    for i in range(3):
+        title_len = len(stories[i]['title'])
+        if title_len > 26:
+            long_title = True
+
+    height_ratio = 1 if long_title else 0.9
+    max_height = max(len(stories[i]['title'])+len(stories[i]['description']) for i in range(3))*height_ratio
     with col1:  
         st.markdown(f"""        
             <div style="border: 2px solid black; padding: 10px; margin: 10px; border-radius: 15px; background-color: {fill_color}; color: black; height: {max_height}px;">        

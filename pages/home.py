@@ -9,12 +9,12 @@ st.set_page_config(layout="centered",
                     page_icon=f'photos/logo.png')
 
 set_background(rf'photos/background.png')
-set_logo(logo_width=30, margin_left=215)
-set_button(buttons_right="-225", margin_top="0")
+set_logo_wa_position(logo_width=30)
+set_button_wa_position()
 
 name = st.session_state['NAME']
 
-col1, col2, col3 = st.columns([0.36, 0.6, 0.01])
+col1, col2, col3 = st.columns([1, 1, 1])
 with col1:
     st.write("")
 with col2:

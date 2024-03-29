@@ -105,6 +105,41 @@ def set_button(buttons_right, margin_top="0", font_size="18", width="200", heigh
             </style>
             """
             ,unsafe_allow_html=True)
+    
+
+
+def set_button_wa_position(font_size="18", width="200", height="50", color="white", border_color="white"):
+    st.markdown(
+            f"""
+            <style>
+                .stButton>button {{
+                    font-size: {font_size}px; 
+                    font-weight: bold;
+                    color: black; 
+                    border-width: 2px;
+                    border-color: {border_color};
+                    background-color: {color}; 
+                    border-radius: 25px;
+                    width: {width}px;
+                    height: {height}px;
+                    margin-left: auto;  
+                    margin-right: auto;
+                    display: block;   
+                }}
+                .stButton>button:hover {{
+                    background-color: #f0f0f0;
+                    color: #9966ff;
+                    border-color: #9966ff;
+                }}
+                .stButton > button:active {{  
+                    background-color: #f0f0f0;
+                    color: #9966ff;
+                    border-color: #9966ff; 
+                    top: 3px;  
+                }}
+            </style>
+            """
+            ,unsafe_allow_html=True)
 
 
 def set_logo(logo_width=50, margin_left="140", margin_bottom="-50", top=None, right=None):
@@ -142,6 +177,23 @@ def set_logo(logo_width=50, margin_left="140", margin_bottom="-50", top=None, ri
             </style>  
             <img src="data:image/png;base64,{img_base64}" class="center move-left">  
         """, unsafe_allow_html=True)
+
+
+def set_logo_wa_position(logo_width=50):
+    logo_path = rf'photos\logo.png'  
+    img_base64 = get_base64(logo_path)
+    st.markdown(f"""  
+        <style>  
+            .center {{  
+                display: block;  
+                margin-left: auto;  
+                margin-right: auto; 
+                margin-bottom: -50px;
+                width: {logo_width}%;  
+            }}  
+        </style>  
+        <img src="data:image/png;base64,{img_base64}" class="center">  
+    """, unsafe_allow_html=True)
 
 
 def set_text_input(width="250", margin_bottom="-55", margin_left='192'):
@@ -317,7 +369,7 @@ def format_table(df,
 
     #cell hover props
     if cell_hover:  
-        cell_hover_props = dict(selector="td:hover", props=[('background-color', cell_hover_color)])   
+        cell_hover_props = dict(selector="th:hover", props=[('tooltip', 'cell_hover_color')])  
         styles.append(cell_hover_props)
         
     #table bordes props

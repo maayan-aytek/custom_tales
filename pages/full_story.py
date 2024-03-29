@@ -21,7 +21,13 @@ b64_home_string = set_image_porperties(path=rf'photos/home_button_image.png', im
 def play_wav(file_path="tts_story.wav"):
     data, samplerate = sf.read(file_path)
     sd.play(data, samplerate)
-    sd.wait()
+
+
+def is_wav_playing():
+    try:
+        return sd.get_stream().active
+    except:
+        return False
 
 def main():
     col1, col2, col3 = st.columns([0.05,0.05,0.8])
@@ -32,6 +38,8 @@ def main():
         ):
             is_click_home = st.button(label='', key='button5')
             if is_click_home:
+                if is_wav_playing():
+                    sd.stop()
                 switch_page('home')
 
     chosen_story = st.session_state['chosen_story']
@@ -50,10 +58,15 @@ def main():
             ):
                 is_click_speaker = st.button(label='', key='button3')
                 if is_click_speaker:
-                    play_wav()
+                    if not is_wav_playing():
+                        play_wav()
+                    else:
+                        sd.stop()
     with col22:
         is_clicked_similar_books = st.button("## Similar children's books you may like :trophy:")
         if is_clicked_similar_books:
+            if is_wav_playing():
+                sd.stop()
             switch_page('recommendations')
         st.image(rf'photos\giphy-unscreen.gif')
 
