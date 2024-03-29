@@ -7,14 +7,14 @@ from streamlit_extras.stylable_container import stylable_container
 st.set_page_config(layout="centered",
                    initial_sidebar_state="collapsed",
                     page_title="CustomTales",
-                    page_icon=f'photos/logo.png')
-set_background(rf'photos/background.png')
+                    page_icon=os.path.join('photos', 'logo.png'))
+set_background(os.path.join('photos', 'background.png'))
 set_text_input(width="280", margin_bottom="-30", margin_left='210')
 set_selectbox_input(width="280", margin_bottom="0", margin_left='210')
 openAI_client = get_openAI_client()
 
-b64_gen_story_string = set_image_porperties(path=rf'photos/generate_story_image.png', image_resize=0.105, x_padding=-10, y_padding=-13)
-b64_home_string = set_image_porperties(path=rf'photos/home_button_image.png', image_resize=0.06, x_padding=-8, y_padding=-8)
+b64_gen_story_string = set_image_porperties(path=os.path.join('photos', 'generate_story_image.png'), image_resize=0.105, x_padding=-10, y_padding=-13)
+b64_home_string = set_image_porperties(path=os.path.join('photos', 'home_button_image.png'), image_resize=0.06, x_padding=-8, y_padding=-8)
 
 col1, col2, col3 = st.columns([0.05,0.05,0.8])
 with col2:

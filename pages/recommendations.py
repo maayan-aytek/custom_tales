@@ -9,9 +9,9 @@ from sklearn.metrics.pairwise import cosine_similarity
 st.set_page_config(layout="wide",
                    initial_sidebar_state="collapsed",
                     page_title="CustomTales",
-                    page_icon=f'photos/logo.png')
-set_background(rf'photos/background.png')
-b64_home_string = set_image_porperties(path=rf'photos/home_button_image.png', image_resize=0.06, x_padding=-8, y_padding=-8)
+                    page_icon=os.path.join('photos', 'logo.png'))
+set_background(os.path.join('photos', 'background.png'))
+b64_home_string = set_image_porperties(os.path.join('photos', 'home_button_image.png'), image_resize=0.06, x_padding=-8, y_padding=-8)
 col1, col2, col3 = st.columns([0.05,0.05,0.8])
 with col2:
     with stylable_container(
@@ -28,9 +28,6 @@ with col3:
 
 fill_color = "rgba(255, 255, 255, 0.5)"  
 set_button(buttons_right="0", margin_top="200", font_size="25", height="200", color=fill_color, border_color="black")
-b64_speaker_string = set_image_porperties(path=rf'photos/speaker_button_image.png', image_resize=0.19, x_padding=-17, y_padding=-9)
-b64_back_string = set_image_porperties(path=rf'photos/back.png', image_resize=0.2, x_padding=-6, y_padding=-6)
-b64_home_string = set_image_porperties(path=rf'photos/home_button_image.png', image_resize=0.06, x_padding=-8, y_padding=-8)
 
 chosen_story = st.session_state['chosen_story']
 chosen_story_embedding = text_to_embedding(chosen_story['description']).reshape(1, -1)

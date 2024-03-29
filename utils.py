@@ -7,6 +7,7 @@ import pandas as pd
 from transformers import SpeechT5Processor, SpeechT5ForTextToSpeech, SpeechT5HifiGan
 from datasets import load_dataset
 import torch
+import os 
 
 @st.cache_resource
 def get_openAI_client():
@@ -22,7 +23,7 @@ def get_base64(bin_file):
     return base64.b64encode(data).decode()
 
 # @st.cache_data
-def set_image_porperties(path="photos/generate_story_image.png", image_resize=0.1, x_padding=-12, y_padding=-12):
+def set_image_porperties(path=os.path.join('photos', 'generate_story_image.png'), image_resize=0.1, x_padding=-12, y_padding=-12):
     import base64  
     from PIL import Image  
     import io 
@@ -150,7 +151,7 @@ def set_button_wa_position(font_size="18", width="200", height="50", color="whit
 
 
 def set_logo(logo_width=50, margin_left="140", margin_bottom="-50", top=None, right=None):
-    logo_path = rf'photos/logo.png'  
+    logo_path = os.path.join('photos', 'logo.png')
     img_base64 = get_base64(logo_path)
     if top and right: 
         st.markdown(f"""  
@@ -187,7 +188,7 @@ def set_logo(logo_width=50, margin_left="140", margin_bottom="-50", top=None, ri
 
 
 def set_logo_wa_position(logo_width=50):
-    logo_path = rf'photos\logo.png'  
+    logo_path = os.path.join('photos', 'logo.png')
     img_base64 = get_base64(logo_path)
     st.markdown(f"""  
         <style>  

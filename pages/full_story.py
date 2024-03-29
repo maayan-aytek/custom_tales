@@ -9,14 +9,13 @@ import sounddevice as sd
 st.set_page_config(layout="wide",
                    initial_sidebar_state="collapsed",
                     page_title="CustomTales",
-                    page_icon=f'photos/logo.png')
-set_background(rf'photos/background.png')
+                    page_icon=os.path.join('photos', 'logo.png'))
+set_background(os.path.join('photos', 'background.png'))
 set_logo(logo_width="15", top="-50", right="-60")
 fill_color = "rgba(255, 255, 255, 0.5)"  
 set_button(buttons_right="0", margin_top="100", font_size="25", height="200", color=fill_color, border_color="black")
-b64_speaker_string = set_image_porperties(path=rf'photos/speaker_button_image.png', image_resize=0.19, x_padding=-17, y_padding=-9)
-b64_home_string = set_image_porperties(path=rf'photos/home_button_image.png', image_resize=0.06, x_padding=-8, y_padding=-8)
-
+b64_speaker_string = set_image_porperties(path=os.path.join('photos', 'speaker_button_image.png'), image_resize=0.19, x_padding=-17, y_padding=-9)
+b64_home_string = set_image_porperties(path=os.path.join('photos', 'home_button_image.png'), image_resize=0.06, x_padding=-8, y_padding=-8)
 
 def play_wav(file_path="tts_story.wav"):
     data, samplerate = sf.read(file_path)

@@ -11,9 +11,9 @@ LEADING_CHAR = '0'
 st.set_page_config(layout="wide",
                    initial_sidebar_state="collapsed",
                     page_title="CustomTales",
-                    page_icon=f'photos/logo.png')
-set_background(rf'photos/background.png')
-b64_home_string = set_image_porperties(path=rf'photos/home_button_image.png', image_resize=0.06, x_padding=-8, y_padding=-8)
+                    page_icon=os.path.join('photos', 'logo.png'))
+set_background(os.path.join('photos', 'background.png'))
+b64_home_string = set_image_porperties(os.path.join('photos', 'home_button_image.png'), image_resize=0.06, x_padding=-8, y_padding=-8)
 col01, col02, col03 = st.columns([0.05,0.05,0.8])
 with col02:
     with stylable_container(

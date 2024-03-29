@@ -5,9 +5,8 @@ from streamlit_extras.switch_page_button import switch_page
 st.set_page_config(layout="centered",
                    initial_sidebar_state="collapsed",
                     page_title="CustomTales",
-                    page_icon=f'photos/logo.png')
-
-set_background(rf'photos/background.png')
+                    page_icon=os.path.join('photos', 'logo.png'))
+set_background(os.path.join('photos', 'background.png'))
 set_logo(logo_width="20", margin_left="800", margin_bottom="-270")
 set_button(buttons_right="-270", margin_top="20")
 set_text_input(width="350", margin_bottom="-30")
