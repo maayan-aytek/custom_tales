@@ -27,8 +27,6 @@ with col03:
     set_logo(logo_width="15", margin_left="335", margin_bottom="0")
 set_circle_button()
 
-
-openAI_client = get_openAI_client()
 db = get_db_connection()
 
 name = st.session_state['NAME']
@@ -100,88 +98,10 @@ if st.session_state['is_story_3_clicked']:
     stories = st.session_state['stories']
     update_story(stories[2])
 
-def get_response(child_age, child_gender, child_interests, story_reading_time, moral_of_the_story, mode, main_character_name, similar_story, similar_story_description):
-    prompts = []
-    if similar_story != "Ignored":
-        similar_story_parts = [f"The story should be inspired by '{similar_story} children book. Here is the book description: {similar_story_description}.",
-                            f"{similar_story}' book is the inspiration, it should echo the essence of its plot without direct replication. Here is the book description: {similar_story_description},",
-                            f"{similar_story}' bookk aim to capture the story spirit and integrate it thoughtfully with a unique twist. Here is the book description: {similar_story_description}."]
-    else:
-        similar_story_parts = ["", "", ""]
-    prompts.append(f"""Generate children story suitable for a {child_age}-year-old {child_gender} child with interests in {child_interests}. 
-                    The story should be around {story_reading_time} minutes long. The moral of the story should be '{moral_of_the_story}'.
-                    The mode of the story should be {mode}. The main character of the story should be named '{main_character_name}'.
-                    Please note that the story doesn't have to include all interests mentioned; it can choose to include only a subset of them.
-                    Also, avoid mixing unrelated interests. If there are multiple interests provided, choose at random only one that fits the story context best.
-                    {similar_story_parts[0]}
-                    Your output must be in the following format: 
-                    Title: ...
-                    Description: ...
-                    Story: ...
-                    """)
-    prompts.append(f"""Craft a tale for a {child_age}-year-old {child_gender} interested in {child_interests}. 
-                    This narrative should unfold over approximately {story_reading_time} minutes. 
-                    Central to the story is the moral '{moral_of_the_story}', which should be seamlessly woven into the plot. 
-                    The narrative style is to be {mode}, and the protagonist, named '{main_character_name}', should embody the story's essence. 
-                    While the story may draw from the child's interests, it should focus on a primary theme to maintain coherence. 
-                    {similar_story_parts[1]}
-                    Your output must be in the following format: 
-                    Title: ...
-                    Description: ...
-                    Story: ...
-                    """)
-    prompts.append(f"""Create a story appropriate for a {child_age}-year-old {child_gender}, with a spotlight on {child_interests}. 
-                    The duration of the story should be close to {story_reading_time} minutes. 
-                    Importantly, the storyline should impart the lesson '{moral_of_the_story}', and be presented in a {mode} manner.
-                    '{main_character_name}' should lead the narrative as the principal character. While the tale can tap into various interests,
-                    it should primarily revolve around one to ensure a unified theme. 
-                    {similar_story_parts[2]}
-                    Your output must be in the following format: 
-                    Title: ...
-                    Description: ...
-                    Story: ...
-                    """)
-    outputs = []
-    for i in range(3):
-        completion = openAI_client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": "You're a story generator tasked with creating captivating children's stories tailored to individual preferences."},
-                {"role": "user", "content": prompts[i]},
-            ],
-        )
-        outputs.append(completion.choices[0])
-
-    stories = []
-    for choice in outputs:
-        generated_content = choice.message.content
-        print("-----------")
-        print(generated_content)
-        # Split generated content into story, title, and description
-        parts = generated_content.split("Title:")
-        if 'Story:' in parts[1].split("Description:")[1]:
-            split_by = 'Story:'
-        elif '<br/>' in parts[1].split("Description:")[1]:
-            split_by = '<br/>'
-        else:
-            split_by = '\n\n'
-        title = parts[1].split("Description:")[0].strip().replace('*', '').replace('#','')
-        description = parts[1].split("Description:")[1].split(split_by)[0].strip().replace('*', '').replace('#','')
-        story = parts[1].split(description)[1].replace('Story:', '').replace('*', '').replace('#','').strip()
-        stories.append({'story':story, 'title':title, 'description':description})
-
-    return stories
-
 
 def change_sessison_state(name, status):
     st.session_state[name] = status
 
-
-if not st.session_state['is_clicked_choose_story']:
-    with st.spinner("Generating stories..."):
-        stories = get_response(child_age=age, child_gender=gender, child_interests=interests, story_reading_time=reading_time, moral_of_the_story=moral,
-                                mode=mode, main_character_name=main_character_name, similar_story=similar_story_title, similar_story_description=similar_story_description)
-        st.session_state['stories'] = stories
 
 if st.session_state['stories']:
     stories = st.session_state['stories']
