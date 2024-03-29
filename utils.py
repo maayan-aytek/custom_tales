@@ -150,7 +150,7 @@ def set_button_wa_position(font_size="18", width="200", height="50", color="whit
 
 
 def set_logo(logo_width=50, margin_left="140", margin_bottom="-50", top=None, right=None):
-    logo_path = rf'photos\logo.png'  
+    logo_path = rf'photos/logo.png'  
     img_base64 = get_base64(logo_path)
     if top and right: 
         st.markdown(f"""  
