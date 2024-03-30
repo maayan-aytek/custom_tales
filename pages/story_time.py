@@ -155,12 +155,12 @@ if is_click_generate_story:
         st.session_state['stories'] = None
 
         with st.spinner("Generating stories..."):
-            name = st.session_state['NAME']
             age = st.session_state['AGE']
             gender = st.session_state['GENDER']
             interests = st.session_state['INTERESTS']
             similar_story_title = st.session_state['story_details']['similar_story']
             similar_story_description = st.session_state['story_details']['similar_story_description']
+            main_character_name = st.session_state['story_details']['main_character_name']
             stories = get_response(child_age=age, child_gender=gender, child_interests=interests, story_reading_time=reading_time, moral_of_the_story=moral,
                                     mode=mode, main_character_name=main_character_name, similar_story=similar_story_title, similar_story_description=similar_story_description)
             st.session_state['stories'] = stories
