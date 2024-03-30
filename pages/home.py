@@ -12,14 +12,7 @@ set_logo_wa_position(logo_width=30)
 set_button_wa_position()
 
 name = st.session_state['NAME']
-
-col1, col2, col3 = st.columns([1, 1, 1])
-with col1:
-    st.write("")
-with col2:
-    st.title(f"Hi {name}!")
-with col3:
-    st.write("")
+st.markdown(f'<h1 style="text-align: center;">Hi {name}!</h1>', unsafe_allow_html=True)
 
 
 is_clicked_story_time = st.button("# Story Time")

@@ -5,7 +5,7 @@ from streamlit_extras.stylable_container import stylable_container
 import datetime
 import numpy as np
 import soundfile as sf
-from multiprocessing import Pool  
+# from multiprocessing import Pool  
 
 LEADING_CHAR = '0'
 
@@ -48,17 +48,16 @@ def generate_voice(story):
     parts = split_text_into_parts(story)  
     print("after split")
     output_array = []
-    device = "cpu"
-    if device=="cuda":
-        for part in parts:  
-            generated_speech = worker(part)
-            output_array.append(generated_speech)  
-    else:
-        print("here")
-        with Pool() as pool:  
-            # Use the Pool's map function to apply string_to_array to each string.  
-            arrays = pool.map(worker, parts)  
-        output_array = arrays
+    for part in parts:  
+        generated_speech = worker(part)
+        output_array.append(generated_speech)  
+
+    # else:
+    #     print("here")
+    #     with Pool() as pool:  
+    #         # Use the Pool's map function to apply string_to_array to each string.  
+    #         arrays = pool.map(worker, parts)  
+    #     output_array = arrays
 
     speech = np.concatenate(output_array, axis=0)  
     sf.write("tts_story.wav", speech.squeeze(), samplerate=17000)

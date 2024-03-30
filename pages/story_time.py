@@ -57,7 +57,8 @@ reading_time = st.text_input("Reading Time (min)", placeholder="")
 moral = st.text_input("Moral", help="""Examples:\n1. Be kind\n2. Believe in yourself\n3. Be Grateful for What You Have\n4. Never Judge a Book by its Cover\n5. Honesty is the Best Policy\n6. You only live once\n7. Never give up""")
 mode = st.selectbox("Mode", options=["Classic", "Creative", "Innovative"], placeholder="")
 main_character_name = st.text_input("Main Character Name", placeholder="", help="If not provided, the main character name will default to the child's name.")
-similar_story = st.selectbox("Story Inspiration", options=['Ignored'] + list(books_df['Name'].drop_duplicates().sort_values()), help="""Select the story template or framework to use as a basis when creating a new story.\n\nIf you're unsure which template to choose, you can leave this field as 'ignored', and a new story will be created from scratch.""")
+similar_story = st.selectbox("Story Inspiration", options=['Ignored'] + list(books_df['Name'].drop_duplicates().sort_values()))
+st.markdown('<div style="margin-right: 467px;"></div>',help="Select the story template or framework to use as a basis when creating a new story.\n\nIf you're unsure which template to choose, you can leave this field as 'ignored', and a new story will be created from scratch.", unsafe_allow_html=True)
 similar_story_description = "" if similar_story == "Ignored" else books_df[books_df['Name'] == similar_story]['Description'].values[0]
 
 with stylable_container(
