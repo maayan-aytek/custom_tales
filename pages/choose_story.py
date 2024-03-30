@@ -119,7 +119,7 @@ if __name__ == "__main__":
             if title_len > 26:
                 long_title = True
 
-        height_ratio = 1.1 if long_title else 1
+        height_ratio = 1.5 if long_title else 1.1
         max_height = max(len(stories[i]['title'])+len(stories[i]['description']) for i in range(3))*height_ratio
         with col1:  
             st.markdown(f"""        

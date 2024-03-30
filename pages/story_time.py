@@ -60,12 +60,15 @@ main_character_name = st.text_input("Main Character Name", placeholder="", help=
 similar_story = st.selectbox("Story Inspiration", options=['Ignored'] + list(books_df['Name'].drop_duplicates().sort_values()))
 st.markdown('<div style="margin-right: 467px;"></div>',help="Select the story template or framework to use as a basis when creating a new story.\n\nIf you're unsure which template to choose, you can leave this field as 'ignored', and a new story will be created from scratch.", unsafe_allow_html=True)
 similar_story_description = "" if similar_story == "Ignored" else books_df[books_df['Name'] == similar_story]['Description'].values[0]
-
+col1, col2 = st.columns([0.5,1])
+with col2:
+    placeholder = st.empty()
 with stylable_container(
     "generate_story",
     css_styles = set_image_circle_button(b64_gen_story_string, radius='11', margin_left='300'),
 ):
     is_click_generate_story = st.button(label='',key="story_time - generate_story")
+
 
 def get_response(child_age, child_gender, child_interests, story_reading_time, moral_of_the_story, mode, main_character_name, similar_story, similar_story_description):
     prompts = []
@@ -155,16 +158,17 @@ if is_click_generate_story:
         st.session_state['is_clicked_choose_story'] = False
         st.session_state['stories'] = None
 
-        with st.spinner("Generating stories..."):
-            age = st.session_state['AGE']
-            gender = st.session_state['GENDER']
-            interests = st.session_state['INTERESTS']
-            similar_story_title = st.session_state['story_details']['similar_story']
-            similar_story_description = st.session_state['story_details']['similar_story_description']
-            main_character_name = st.session_state['story_details']['main_character_name']
-            stories = get_response(child_age=age, child_gender=gender, child_interests=interests, story_reading_time=reading_time, moral_of_the_story=moral,
-                                    mode=mode, main_character_name=main_character_name, similar_story=similar_story_title, similar_story_description=similar_story_description)
-            st.session_state['stories'] = stories
+        with placeholder:
+            with st.spinner("Generating stories..."):
+                age = st.session_state['AGE']
+                gender = st.session_state['GENDER']
+                interests = st.session_state['INTERESTS']
+                similar_story_title = st.session_state['story_details']['similar_story']
+                similar_story_description = st.session_state['story_details']['similar_story_description']
+                main_character_name = st.session_state['story_details']['main_character_name']
+                stories = get_response(child_age=age, child_gender=gender, child_interests=interests, story_reading_time=reading_time, moral_of_the_story=moral,
+                                        mode=mode, main_character_name=main_character_name, similar_story=similar_story_title, similar_story_description=similar_story_description)
+                st.session_state['stories'] = stories
         switch_page("choose_story")
 
         
