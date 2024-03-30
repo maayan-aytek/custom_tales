@@ -11,10 +11,10 @@ import os
 
 @st.cache_resource
 def get_openAI_client():
-    # OPENAI_KEY = st.secrets['OPENAI_KEY']
-    with open('config.json', 'r') as file:
-        config = json.load(file)
-    OPENAI_KEY = config['OPENAI_KEY']
+    OPENAI_KEY = st.secrets['OPENAI_KEY']
+    # with open('config.json', 'r') as file:
+    #     config = json.load(file)
+    # OPENAI_KEY = config['OPENAI_KEY']
     openai.api_key = OPENAI_KEY
     client = openai.OpenAI(api_key=OPENAI_KEY)
     return client
@@ -23,20 +23,20 @@ def get_openAI_client():
 def get_db_connection():
     import json
     from google.cloud import firestore
-    # FIREBASE_JSON = "customtales-b1c5d-firebase-adminsdk-c7ntb-7689c30bb8.json"
-    LOCAL_PATH = "db_config.json"
-    # with open(FIREBASE_JSON, 'r') as file:
-    #     config = json.load(file)
-    # config["private_key_id"] = st.secrets["private_key_id"]
-    # config["private_key"] = st.secrets["private_key"]
-    # config["client_email"] = st.secrets["client_email"]
-    # config["client_id"] = st.secrets["client_id"]
-    # config["client_x509_cert_url"] = st.secrets["client_x509_cert_url"]
+    FIREBASE_JSON = "customtales-b1c5d-firebase-adminsdk-c7ntb-7689c30bb8.json"
+    # LOCAL_PATH = "db_config.json"
+    with open(FIREBASE_JSON, 'r') as file:
+        config = json.load(file)
+    config["private_key_id"] = st.secrets["private_key_id"]
+    config["private_key"] = st.secrets["private_key"]
+    config["client_email"] = st.secrets["client_email"]
+    config["client_id"] = st.secrets["client_id"]
+    config["client_x509_cert_url"] = st.secrets["client_x509_cert_url"]
     
-    # with open(FIREBASE_JSON, 'w') as file:
-    #     json.dump(config, file)
+    with open(FIREBASE_JSON, 'w') as file:
+        json.dump(config, file)
 
-    db = firestore.Client.from_service_account_json(LOCAL_PATH)
+    db = firestore.Client.from_service_account_json(FIREBASE_JSON)
     return db
 
 
