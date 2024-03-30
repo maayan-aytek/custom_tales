@@ -12,8 +12,11 @@ import os
 @st.cache_resource
 def get_openAI_client():
     OPENAI_KEY = st.secrets['OPENAI_KEY']
+    st.write(OPENAI_KEY)
     openai.api_key = OPENAI_KEY
+    st.write("1")
     client = openai.OpenAI(api_key=OPENAI_KEY)
+    st.write("2")
     return client
 
 @st.cache_data
