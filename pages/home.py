@@ -8,7 +8,7 @@ st.set_page_config(layout="centered",
                     page_title="CustomTales",
                     page_icon=os.path.join('photos', 'logo.png'))
 set_background(os.path.join('photos', 'background.png'))
-set_logo_wa_position(logo_width=30)
+set_logo_wa_position(logo_width=40)
 set_button_wa_position()
 
 name = st.session_state['NAME']

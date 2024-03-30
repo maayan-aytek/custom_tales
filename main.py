@@ -9,15 +9,10 @@ st.set_page_config(layout="centered",
                     page_title="CustomTales",
                     page_icon=os.path.join('photos', 'logo.png'))
 set_background(os.path.join('photos', 'background.png'))
-set_logo(logo_width=40, margin_left=180)
-set_button(buttons_right="-215", margin_top="0")
-col1, col2, col3 = st.columns([0.09, 0.8, 0.11])
-with col1:
-    st.write("")
-with col2:
-    st.title("Welcome to CustomTales!")
-with col3:
-    st.write("")
+set_logo_wa_position(logo_width=40)
+set_button_wa_position()
+
+st.markdown(f'<h1 style="text-align: center;">Welcome to CustomTales!</h1>', unsafe_allow_html=True)
 
 is_clicked_about = st.button("# About Us")
 is_click_login = st.button("# Login")
