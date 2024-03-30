@@ -11,13 +11,47 @@ import os
 
 @st.cache_resource
 def get_openAI_client():
-    OPENAI_KEY = st.secrets['OPENAI_KEY']
-    # with open('config.json', 'r') as file:
-    #     config = json.load(file)
-    # OPENAI_KEY = config['OPENAI_KEY']
+    # OPENAI_KEY = st.secrets['OPENAI_KEY']
+    with open('config.json', 'r') as file:
+        config = json.load(file)
+    OPENAI_KEY = config['OPENAI_KEY']
     openai.api_key = OPENAI_KEY
     client = openai.OpenAI(api_key=OPENAI_KEY)
     return client
+
+@st.cache_resource
+def get_db_connection():
+    import json
+    from google.cloud import firestore
+    # FIREBASE_JSON = "customtales-b1c5d-firebase-adminsdk-c7ntb-7689c30bb8.json"
+    LOCAL_PATH = "db_config.json"
+    # with open(FIREBASE_JSON, 'r') as file:
+    #     config = json.load(file)
+    # config["private_key_id"] = st.secrets["private_key_id"]
+    # config["private_key"] = st.secrets["private_key"]
+    # config["client_email"] = st.secrets["client_email"]
+    # config["client_id"] = st.secrets["client_id"]
+    # config["client_x509_cert_url"] = st.secrets["client_x509_cert_url"]
+    
+    # with open(FIREBASE_JSON, 'w') as file:
+    #     json.dump(config, file)
+
+    db = firestore.Client.from_service_account_json(LOCAL_PATH)
+    return db
+
+
+@st.cache_resource
+def get_speaker_instances():
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    # device = "cpu"
+    print(device)
+    processor = SpeechT5Processor.from_pretrained("microsoft/speecht5_tts") 
+    model = SpeechT5ForTextToSpeech.from_pretrained("microsoft/speecht5_tts").to(device)  
+    vocoder = SpeechT5HifiGan.from_pretrained("microsoft/speecht5_hifigan").to(device)  
+    embeddings_dataset = load_dataset("Matthijs/cmu-arctic-xvectors", split="validation")  
+    speaker_embeddings = torch.tensor(embeddings_dataset[7306]["xvector"]).unsqueeze(0).to(device)  
+    return device, processor, model, vocoder, speaker_embeddings
+
 
 @st.cache_data
 def get_base64(bin_file):
@@ -60,27 +94,6 @@ def set_background(png_file):
         </style>
     """ % bin_str
     st.markdown(page_bg_img, unsafe_allow_html=True)
-
-
-@st.cache_resource
-def get_db_connection():
-    import json
-    from google.cloud import firestore
-    FIREBASE_JSON = "customtales-b1c5d-firebase-adminsdk-c7ntb-7689c30bb8.json"
-    # LOCAL_PATH = "db_config.json"
-    with open(FIREBASE_JSON, 'r') as file:
-        config = json.load(file)
-    config["private_key_id"] = st.secrets["private_key_id"]
-    config["private_key"] = st.secrets["private_key"]
-    config["client_email"] = st.secrets["client_email"]
-    config["client_id"] = st.secrets["client_id"]
-    config["client_x509_cert_url"] = st.secrets["client_x509_cert_url"]
-    
-    with open(FIREBASE_JSON, 'w') as file:
-        json.dump(config, file)
-
-    db = firestore.Client.from_service_account_json(FIREBASE_JSON)
-    return db
 
 
 def set_button(buttons_right, margin_top="0", font_size="18", width="200", height="50", color="white", border_color="white"):
@@ -424,17 +437,6 @@ def set_tabs():
         }
 
     </style>""", unsafe_allow_html=True)
-
-@st.cache_resource
-def get_speaker_instances():
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")  
-    processor = SpeechT5Processor.from_pretrained("microsoft/speecht5_tts") 
-    model = SpeechT5ForTextToSpeech.from_pretrained("microsoft/speecht5_tts").to(device)  
-    vocoder = SpeechT5HifiGan.from_pretrained("microsoft/speecht5_hifigan").to(device)  
-    embeddings_dataset = load_dataset("Matthijs/cmu-arctic-xvectors", split="validation")  
-    speaker_embeddings = torch.tensor(embeddings_dataset[7306]["xvector"]).unsqueeze(0).to(device)  
-    return device, processor, model, vocoder, speaker_embeddings
-
 
 
 def mean_pooling(model_output, attention_mask):
