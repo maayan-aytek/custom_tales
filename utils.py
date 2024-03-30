@@ -12,11 +12,11 @@ import os
 @st.cache_resource
 def get_openAI_client():
     OPENAI_KEY = st.secrets['OPENAI_KEY']
-    st.write(OPENAI_KEY)
+    # with open('config.json', 'r') as file:
+    #     config = json.load(file)
+    # OPENAI_KEY = config['OPENAI_KEY']
     openai.api_key = OPENAI_KEY
-    st.write("1")
     client = openai.OpenAI(api_key=OPENAI_KEY)
-    st.write("2")
     return client
 
 @st.cache_data
@@ -67,7 +67,7 @@ def get_db_connection():
     import json
     from google.cloud import firestore
     FIREBASE_JSON = "customtales-b1c5d-firebase-adminsdk-c7ntb-7689c30bb8.json"
-    LOCAL_PATH = "db_config.json"
+    # LOCAL_PATH = "db_config.json"
     with open(FIREBASE_JSON, 'r') as file:
         config = json.load(file)
     config["private_key_id"] = st.secrets["private_key_id"]
