@@ -7,7 +7,7 @@ import pandas as pd
 from transformers import SpeechT5Processor, SpeechT5ForTextToSpeech, SpeechT5HifiGan
 from datasets import load_dataset
 import torch
-import os 
+import os
 
 @st.cache_resource
 def get_openAI_client():
