@@ -16,7 +16,7 @@ st.set_page_config(layout="wide",
                     page_icon=os.path.join('photos', 'logo.png'))
 set_background(os.path.join('photos', 'background.png'))
 set_selectbox_input(width="280", margin_left='30', margin_top=-20)
-set_button_wa_position(margin_top=60)
+set_button(margin_top=60, buttons_right=-70)
 set_tabs()
 db = get_db_connection()
 

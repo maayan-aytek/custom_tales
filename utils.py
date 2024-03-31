@@ -9,6 +9,8 @@ from datasets import load_dataset
 import torch
 import os
 
+LEADING_CHAR = '0'
+
 @st.cache_resource
 def get_openAI_client():
     OPENAI_KEY = st.secrets['OPENAI_KEY']
@@ -43,7 +45,6 @@ def get_db_connection():
 @st.cache_resource
 def get_speaker_instances():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    # device = "cpu"
     print(device)
     processor = SpeechT5Processor.from_pretrained("microsoft/speecht5_tts") 
     model = SpeechT5ForTextToSpeech.from_pretrained("microsoft/speecht5_tts").to(device)  
@@ -132,7 +133,7 @@ def set_button(buttons_right, margin_top="0", font_size="18", width="200", heigh
     
 
 
-def set_button_wa_position(font_size="18", width="200", height="50", color="white", border_color="white"):
+def set_button_wa_position(font_size="18", width="200", height="50", color="white", border_color="white", margin_top=0):
     st.markdown(
             f"""
             <style>
@@ -148,6 +149,7 @@ def set_button_wa_position(font_size="18", width="200", height="50", color="whit
                     height: {height}px;
                     margin-left: auto;  
                     margin-right: auto;
+                    margin-top: {margin_top}px;
                     display: block;   
                 }}
                 .stButton>button:hover {{
@@ -203,7 +205,7 @@ def set_logo(logo_width=50, margin_left="140", margin_bottom="-50", top=None, ri
         """, unsafe_allow_html=True)
 
 
-def set_logo_wa_position(logo_width=50):
+def set_logo_wa_position(logo_width=50, margin_bottom = -50, margin_top=-60):
     logo_path = os.path.join('photos', 'logo.png')
     img_base64 = get_base64(logo_path)
     st.markdown(f"""  
@@ -212,8 +214,8 @@ def set_logo_wa_position(logo_width=50):
                 display: block;  
                 margin-left: auto;  
                 margin-right: auto; 
-                margin-bottom: -50px;
-                margin-top: -60px;
+                margin-bottom: {margin_bottom}px;
+                margin-top: {margin_top}px;
                 width: {logo_width}%;  
             }}  
         </style>  
@@ -257,14 +259,32 @@ def set_number_input(width="250", margin_bottom="-55"):
     """
     , unsafe_allow_html=True)
 
+def set_multiSelectBox_input(width="400", margin_bottom="0", margin_left='-20', margin_top=0):
+    st.markdown(
+    f"""
+    <style>
+    .stMultiSelect {{
+        margin-left: {margin_left}px; 
+        margin-bottom: {margin_bottom}px;
+        margin-top: {margin_top}px;
+        max-width: {width}px;
+	}}
+    span[data-baseweb="tag"] {{
+  background-color: purple !important;
+    }}
+    </style>
+    """
+    ,unsafe_allow_html=True)
 
-def set_selectbox_input(width="250", margin_bottom="-55", margin_left='192'):
+
+def set_selectbox_input(width="250", margin_bottom="-55", margin_left='192', margin_top=0):
     st.markdown(
     f"""
     <style>
     .stSelectbox {{
         margin-left: {margin_left}px; 
         margin-bottom: {margin_bottom}px;
+        margin-top: {margin_top}px;
 	}}
 
     .stSelectbox > div[data-baseweb="select"] > div {{
@@ -306,8 +326,26 @@ def set_image_circle_button(b64_string, margin_left='20', margin_top='20', radiu
                     margin-top: {margin_top}px;
                     }}"""
     return css_style
+
+def set_custom_button():
+    css_style = f"""    
+                    button{{
+                    background-color: rgba(255, 255, 255, 0.5);
+                    border: 2px solid black;    
+                    font-size: 10px;
+                    height: 13px;
+                    margin-top: 70px;    
+                    font-weight: bold;    
+                    display: block;  }}
+
+                    .stButton > button:active {{  
+                    color: #9966ff;
+                }}
+                    """
     
-def set_circle_button(margin_left='100'):    
+    return css_style
+    
+def set_circle_button():    
     st.markdown(f"""        
             <style>        
                 div.stButton > button:first-child {{        
@@ -321,7 +359,6 @@ def set_circle_button(margin_left='100'):
                     line-height: 1em;  
                     box-sizing: border-box;        
                     box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.25);  
-                
                 }}        
   
                 div.stButton > button:hover {{      
