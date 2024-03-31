@@ -74,7 +74,10 @@ with stylable_container(
 
 def get_response(child_age, child_gender, child_interests, story_reading_time, moral_of_the_story, mode, main_character_name, similar_story, similar_story_description):
     child_interests = child_interests.split(", ")
-    child_interests = random.sample(child_interests, k=3)
+    if len(child_interests) < 3: 
+        child_interests = random.choices(child_interests, k=3)
+    else:
+        child_interests = random.sample(child_interests, k=3)
     prompts = []
     if similar_story != "Ignored":
         similar_story_parts = [f"The story should be inspired by '{similar_story} children book. Here is the book description: {similar_story_description}.",
