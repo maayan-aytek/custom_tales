@@ -3,6 +3,8 @@ from utils import *
 import pandas as pd 
 from streamlit_extras.switch_page_button import switch_page
 from streamlit_extras.stylable_container import stylable_container
+import random
+
 
 st.set_page_config(layout="centered",
                    initial_sidebar_state="collapsed",
@@ -71,6 +73,8 @@ with stylable_container(
 
 
 def get_response(child_age, child_gender, child_interests, story_reading_time, moral_of_the_story, mode, main_character_name, similar_story, similar_story_description):
+    child_interests = child_interests.split(", ")
+    child_interests = random.sample(child_interests, k=3)
     prompts = []
     if similar_story != "Ignored":
         similar_story_parts = [f"The story should be inspired by '{similar_story} children book. Here is the book description: {similar_story_description}.",
@@ -78,7 +82,7 @@ def get_response(child_age, child_gender, child_interests, story_reading_time, m
                             f"{similar_story}' bookk aim to capture the story spirit and integrate it thoughtfully with a unique twist. Here is the book description: {similar_story_description}."]
     else:
         similar_story_parts = ["", "", ""]
-    prompts.append(f"""Generate children story suitable for a {child_age}-year-old {child_gender} child with interests in {child_interests}. 
+    prompts.append(f"""Generate children story suitable for a {child_age}-year-old {child_gender} child with interests in {child_interests[0]}. 
                     The story should be around {story_reading_time} minutes long. The moral of the story should be '{moral_of_the_story}'.
                     The mode of the story should be {mode}. The main character of the story should be named '{main_character_name}'.
                     Please note that the story doesn't have to include all interests mentioned; it can choose to include only a subset of them.
@@ -89,7 +93,7 @@ def get_response(child_age, child_gender, child_interests, story_reading_time, m
                     Description: ...
                     Story: ...
                     """)
-    prompts.append(f"""Craft a tale for a {child_age}-year-old {child_gender} interested in {child_interests}. 
+    prompts.append(f"""Craft a tale for a {child_age}-year-old {child_gender} interested in {child_interests[1]}. 
                     This narrative should unfold over approximately {story_reading_time} minutes. 
                     Central to the story is the moral '{moral_of_the_story}', which should be seamlessly woven into the plot. 
                     The narrative style is to be {mode}, and the protagonist, named '{main_character_name}', should embody the story's essence. 
@@ -100,7 +104,7 @@ def get_response(child_age, child_gender, child_interests, story_reading_time, m
                     Description: ...
                     Story: ...
                     """)
-    prompts.append(f"""Create a story appropriate for a {child_age}-year-old {child_gender}, with a spotlight on {child_interests}. 
+    prompts.append(f"""Create a story appropriate for a {child_age}-year-old {child_gender}, with a spotlight on {child_interests[2]}. 
                     The duration of the story should be close to {story_reading_time} minutes. 
                     Importantly, the storyline should impart the lesson '{moral_of_the_story}', and be presented in a {mode} manner.
                     '{main_character_name}' should lead the narrative as the principal character. While the tale can tap into various interests,

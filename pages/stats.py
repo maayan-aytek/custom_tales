@@ -26,7 +26,7 @@ col1, col2, col3 = st.columns([0.05,0.05,0.8])
 with col2:
     with stylable_container(
         "home",
-        css_styles = set_image_circle_button(b64_home_string, margin_left='-370', margin_top='-95'),
+        css_styles = set_image_circle_button(b64_home_string, margin_left='-200', margin_top='-95'),
     ):
         is_click_home = st.button(label='', key='button2')
         if is_click_home:
