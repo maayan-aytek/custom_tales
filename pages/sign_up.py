@@ -1,18 +1,30 @@
 import streamlit as st
 from utils import *
 from streamlit_extras.switch_page_button import switch_page
+from streamlit_extras.stylable_container import stylable_container
 
 st.set_page_config(layout="centered",
                    initial_sidebar_state="collapsed",
                     page_title="CustomTales",
                     page_icon=os.path.join('photos', 'logo.png'))
 set_background(os.path.join('photos', 'background.png'))
-set_logo(logo_width="20", margin_left="800", margin_bottom="-270")
+set_logo(logo_width="20", margin_left="970", margin_bottom="-270")
 set_button(buttons_right="-270", margin_top="20")
 set_text_input(width="350", margin_bottom="-30")
 set_number_input(width="20", margin_bottom="-5")
 set_selectbox_input(width="350", margin_bottom="-5")
 db = get_db_connection()
+
+b64_home_string = set_image_porperties(os.path.join('photos', 'home_button_image.png'), image_resize=0.06, x_padding=-8, y_padding=-8)
+col01, col02, col03 = st.columns([0.05,0.05,0.8])
+with col02:
+    with stylable_container(
+        "home",
+        css_styles = set_image_circle_button(b64_home_string, margin_left='-700', margin_top='-130')
+    ):
+        is_click_home = st.button(label='', key='button2')
+        if is_click_home:
+            switch_page('home')
 
 
 def is_validate_details(user_name, password, name, gender, age, interests, db):

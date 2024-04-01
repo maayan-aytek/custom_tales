@@ -46,6 +46,7 @@ def plot_weekly_histogram(doc_dict):
         dates.append(datetime.strptime(story_details['generate_time'], "%d/%m/%Y"))
 
     last_dates_of_week = [(date + timedelta(days=(7 - date.weekday()))).strftime("%d/%m/%Y") for date in dates]
+    last_dates_of_week = [datetime.strptime(date, "%d/%m/%Y") for date in last_dates_of_week]
     last_dates_of_week = sorted(last_dates_of_week, reverse=True)
     fig = go.Figure(data=[go.Histogram(x=last_dates_of_week, marker=dict(color="rgb(158, 185, 243)",line=dict(width=1, color='#FFFFFF')))])
 
@@ -202,7 +203,7 @@ def restore_story(doc_dict):
 
 stats_tab, restore_story_tab = st.tabs(['Statistics', 'Restore Story'])   
 with stats_tab:
-    col1, col2, col3 = st.columns([0.9, 1, 1])
+    col1, col2, col3 = st.columns([0.7, 1.2, 1.1])
     with col1:
         plot_weekly_histogram(doc_dict)
     with col2:
