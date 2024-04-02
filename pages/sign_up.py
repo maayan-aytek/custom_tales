@@ -24,7 +24,7 @@ with col02:
     ):
         is_click_home = st.button(label='', key='button2')
         if is_click_home:
-            switch_page('home')
+            switch_page('main')
 
 
 def is_validate_details(user_name, password, name, gender, age, interests, db):
