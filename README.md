@@ -8,7 +8,7 @@
 
 <h2>🛠️ Installation Steps:</h2>
 
-<p id="description">You don't have to run our app local. You can simply use our public link, but if you want to utilize GPU (if you have one) to speed up preformance, you can run it locally by following these steps:</p>
+<p id="description">You don't have to run our app local. You can simply use our public link. However, if you want to utilize a GPU (if you have one) to speed up preformance, you can run it locally by following these steps:</p>
 <p>1. Create conda environment</p>
 
 ```
