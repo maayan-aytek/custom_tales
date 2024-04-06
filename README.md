@@ -4,6 +4,8 @@
 
 ![logo](https://github.com/maayan-aytek/custom_tales/assets/81248290/878fbd3b-c6a1-4666-94dc-ce766516afef)
 
+<img src="[drawing.jpg](https://github.com/maayan-aytek/custom_tales/assets/81248290/878fbd3b-c6a1-4666-94dc-ce766516afef)" alt="logo" width="100"/>
+
 <h2>🛠️ Installation Steps:</h2>
 
 <p id="description">You don't have to run our app local. You can simply use our public link. However, if you want to utilize a GPU (if you have one) to speed up preformance, you can run it locally by following these steps:</p>
