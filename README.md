@@ -1,10 +1,9 @@
 <h1 align="center" id="title">CustomTales</h1>
 
-<p id="description">Welcome to Custom Tales! An interactive storytelling streamlit app where creativity meets personalization. Our app leverages the power of artificial intelligence to craft customized stories tailored to your child's unique needs. Furthermore our system recommends similar children's books that align with your child's preferences helping you make informed choices when expanding their library. To get started here is the link to our app: https://customtales.streamlit.app/</p>
+<p id="description">Welcome to Custom Tales! An interactive storytelling streamlit app where creativity meets personalization. Our app leverages the power of artificial intelligence to craft customized stories tailored to your child's unique needs. Furthermore our system recommends similar children's books that align with your child's preferences helping you make informed choices when expanding their library. To get started here is the link to our app:/customtales.streamlit.app/</p>
+https:/![logo](https://github.com/maayan-aytek/custom_tales/assets/81248290/9cfea89c-9939-44f8-b3ec-89a47c972dd7)
 
-<h2>🚀 Demo</h2>
 
-(Link)
 
 <h2>🛠️ Installation Steps:</h2>
 
