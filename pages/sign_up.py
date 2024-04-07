@@ -3,6 +3,8 @@ from utils import *
 from streamlit_extras.switch_page_button import switch_page
 from streamlit_extras.stylable_container import stylable_container
 
+
+# page and styling configurations 
 st.set_page_config(layout="centered",
                    initial_sidebar_state="collapsed",
                     page_title="CustomTales",
@@ -15,6 +17,8 @@ set_number_input(width="20", margin_bottom="-5")
 set_selectbox_input(width="350", margin_bottom="-5")
 db = get_db_connection()
 
+
+# Setting home button
 b64_home_string = set_image_porperties(os.path.join('photos', 'home_button_image.png'), image_resize=0.06, x_padding=-8, y_padding=-8)
 col01, col02, col03 = st.columns([0.05,0.05,0.8])
 with col02:
@@ -28,10 +32,12 @@ with col02:
 
 
 def is_validate_details(user_name, password, name, gender, age, interests, db):
+    # Validate all details are inserted in the right format 
     if not all([user_name, password, name, gender, age, interests]):
         st.warning("Please fill in all fields.", icon="⚠️")
         return False
 
+    # Verfity the user doesn't exist in our database 
     all_users = [user.id for user in db.collection('users').get()]
     if user_name in all_users:
         st.warning("Username alreay exists in the system. Please choose other username.", icon="⚠️")
@@ -51,6 +57,7 @@ def is_validate_details(user_name, password, name, gender, age, interests, db):
     return True
 
 
+# Styling and buttons definition
 col1, col2, col3 = st.columns([0.18, 0.7, 0.12])
 with col1:
     st.write("")

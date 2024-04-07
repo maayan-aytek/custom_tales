@@ -3,6 +3,7 @@ from utils import *
 from streamlit_extras.switch_page_button import switch_page
 
 
+# page and styling configurations 
 st.set_page_config(layout="centered",
                    initial_sidebar_state="collapsed",
                     page_title="CustomTales",
@@ -12,8 +13,7 @@ set_logo_wa_position(logo_width=40)
 set_button_wa_position()
 
 name = st.session_state['NAME']
-st.markdown(f'<h1 style="text-align: center;">Hi {name}!</h1>', unsafe_allow_html=True)
-
+st.markdown(f'<h1 style="text-align: center;">Hi {name}!</h1>', unsafe_allow_html=True) #Welome message using the user name
 
 is_clicked_story_time = st.button("# Story Time")
 is_click_my_stories = st.button("# My Stories")

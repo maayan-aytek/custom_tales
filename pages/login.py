@@ -1,10 +1,10 @@
 import streamlit as st
-import json
-from google.cloud import firestore
 from utils import *
 from streamlit_extras.switch_page_button import switch_page
 from streamlit_extras.stylable_container import stylable_container
 
+
+# page and styling configurations 
 st.set_page_config(layout="centered",
                    initial_sidebar_state="collapsed",
                     page_title="CustomTales",
@@ -15,6 +15,7 @@ set_button(buttons_right="-217", margin_top="50")
 set_text_input()
 db = get_db_connection()
 
+# Setting home button
 b64_home_string = set_image_porperties(os.path.join('photos', 'home_button_image.png'), image_resize=0.06, x_padding=-8, y_padding=-8)
 col01, col02, col03 = st.columns([0.05,0.05,0.8])
 with col02:
@@ -26,12 +27,14 @@ with col02:
         if is_click_home:
             switch_page('main')
 
+# Setting buttons 
 user_name = st.text_input("", placeholder="username")
 password = st.text_input("", type="password", placeholder="password")
 is_click_login = st.button("# Login")
 
 
 if is_click_login:
+    # Verify the user username and password
     all_users = db.collection('users').get()
     incorrect_details = False
     for user in all_users:

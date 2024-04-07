@@ -5,6 +5,8 @@ from streamlit_extras.stylable_container import stylable_container
 import soundfile as sf
 import pickle 
 
+
+# page and styling configurations 
 st.set_page_config(layout="wide",
                    initial_sidebar_state="collapsed",
                    page_title="CustomTales",
@@ -23,13 +25,17 @@ b64_home_string = set_image_porperties(path=os.path.join('photos', 'home_button_
 openAI_client = get_openAI_client()
 db = get_db_connection()
 
+# Loading tokenizer model for splitting text by sentences
 with open('punkt.pickle', 'rb') as f:
         tokenizer = pickle.load(f)
 
+# Playing the story audio file 
 def play_wav(file_path="tts_story.wav"):
     data, samplerate = sf.read(file_path)
     st.audio(data, format="audio/wav", sample_rate=samplerate)
 
+
+# Numbering the rows in the full story (for the editing part)
 def add_row_number(story):
   sentences = tokenizer.tokenize(story)
   sentences_dict = {(i+1):sen for i, sen in enumerate(sentences)}
@@ -40,7 +46,10 @@ def add_row_number(story):
     story = prefix + f'({i}) ' + suffix
   return story, sentences_dict
 
+
+# Edit story by the selected rows numbers 
 def replace_sentences(row_number_2_change, reason_to_change, sentences_dict):
+    # Mapping the reason string to the prompt for the LLM
     reason_dict = {"Not to My Taste": "I want to change these lines because it doesn't match my preferences.", 
                    "Uninspiring": "These lines lack creativity for me; I'd like to inject more inspiration into it.", 
                    "Feels Forced": "These lines feels unnatural; I'd prefer something that flows more organically.", 
@@ -48,6 +57,7 @@ def replace_sentences(row_number_2_change, reason_to_change, sentences_dict):
                    "Disrupts Flow": "I find that these lines disrupts the narrative flow; I'd like to make it smoother.", 
                    "Other": "Change these lines to something else"}
     
+    # Building prompt for editing the story
     initial_story = st.session_state['chosen_story']['story'].replace('*','').replace('#','')
     sentences2prompt = [f"- {sentences_dict[i_sen]}\n" for i_sen in row_number_2_change]
     prompt = f"""Below is the story you generated,
@@ -77,18 +87,19 @@ def replace_sentences(row_number_2_change, reason_to_change, sentences_dict):
         ],
     )
     story_after_change = completion.choices[0].message.content
+    # update the edited story in the session_state
     st.session_state['chosen_story']['story'] = story_after_change.split(":**\n")[1]
-    print("prompt:", prompt)
-    print(story_after_change)
-    
     title = st.session_state['chosen_story']['title']
+
+    # Update the edited story in the database
     doc_ref = db.collection("users").document(st.session_state['USERNAME'])
     doc_ref.update({f"stories.{LEADING_CHAR + title}.story": LEADING_CHAR + story_after_change})
 
 
 
 def main():
-    col1, col2, col3 = st.columns([0.05, 0.05, 0.8])
+    # Styling 
+    _, col2, _ = st.columns([0.05, 0.05, 0.8])
     with col2:
         with stylable_container(
                 "home2",
@@ -123,6 +134,7 @@ def main():
             switch_page('recommendations')
         st.image(os.path.join('photos', 'giphy-unscreen.gif'))
 
+    # Editing interation styling
     row_number_2_change = st.multiselect('Select the lines numbers that you want to modify.', options=list(sentences_dict.keys()), help='')
     if row_number_2_change != []:
         reason_to_change = st.selectbox("Explain why do you want to modify these lines:",options=['Not to My Taste', 'Feel Forced', 'Uninspiring', 'Disrupts Flow', 'Needs Improvement', 'Other'])
@@ -135,5 +147,7 @@ def main():
                 if is_click_replace_sen:
                     with st.spinner("Editing your story..."): 
                         replace_sentences(row_number_2_change, reason_to_change, sentences_dict)
+                        # Load the page again with the edited story
                         st.rerun()
+
 main()

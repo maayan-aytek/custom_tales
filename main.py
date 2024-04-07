@@ -12,12 +12,15 @@ set_background(os.path.join('photos', 'background.png'))
 set_logo_wa_position(logo_width=40)
 set_button_wa_position()
 
+# Main inital page in the app
 st.markdown(f'<h1 style="text-align: center;">Welcome to CustomTales!</h1>', unsafe_allow_html=True)
 
+# buttons definitions
 is_clicked_about = st.button("# About Us")
 is_click_login = st.button("# Login")
 is_click_sign_up = st.button("# Sign Up")
 
+# switch to other pages
 if is_clicked_about:
     switch_page("about")
 if is_click_sign_up:

@@ -8,6 +8,9 @@ from transformers import SpeechT5Processor, SpeechT5ForTextToSpeech, SpeechT5Hif
 from datasets import load_dataset
 import torch
 import os
+import base64  
+from PIL import Image  
+import io 
 
 LEADING_CHAR = '0'
 
@@ -44,6 +47,7 @@ def get_db_connection():
 
 @st.cache_resource
 def get_speaker_instances():
+    # get the text to speech model instance
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(device)
     processor = SpeechT5Processor.from_pretrained("microsoft/speecht5_tts") 
@@ -56,15 +60,12 @@ def get_speaker_instances():
 
 @st.cache_data
 def get_base64(bin_file):
+    # bin file to base64 type for image represntation
     with open(bin_file, 'rb') as f:
         data = f.read()
     return base64.b64encode(data).decode()
 
-# @st.cache_data
 def set_image_porperties(path=os.path.join('photos', 'generate_story_image.png'), image_resize=0.1, x_padding=-12, y_padding=-12):
-    import base64  
-    from PIL import Image  
-    import io 
     with Image.open(path) as img:  
         # Resize the image
         width, height = img.size   
@@ -85,6 +86,7 @@ def set_image_porperties(path=os.path.join('photos', 'generate_story_image.png')
 
 @st.cache_data
 def set_background(png_file):
+    # setting background image
     bin_str = get_base64(png_file)
     page_bg_img = """
         <style>
@@ -97,6 +99,8 @@ def set_background(png_file):
     st.markdown(page_bg_img, unsafe_allow_html=True)
 
 
+
+# style and locate buttons 
 def set_button(buttons_right, margin_top="0", font_size="18", width="200", height="50", color="white", border_color="white"):
     st.markdown(
             f"""
@@ -132,7 +136,7 @@ def set_button(buttons_right, margin_top="0", font_size="18", width="200", heigh
             ,unsafe_allow_html=True)
     
 
-
+# style buttons (without changing positions)
 def set_button_wa_position(font_size="18", width="200", height="50", color="white", border_color="white", margin_top=0):
     st.markdown(
             f"""
@@ -168,6 +172,7 @@ def set_button_wa_position(font_size="18", width="200", height="50", color="whit
             ,unsafe_allow_html=True)
 
 
+# setting and locating logo image 
 def set_logo(logo_width=50, margin_left="140", margin_bottom="-50", top=None, right=None):
     logo_path = os.path.join('photos', 'logo.png')
     img_base64 = get_base64(logo_path)
@@ -205,6 +210,7 @@ def set_logo(logo_width=50, margin_left="140", margin_bottom="-50", top=None, ri
         """, unsafe_allow_html=True)
 
 
+# setting logo image (without changing positions)
 def set_logo_wa_position(logo_width=50, margin_bottom = -50, margin_top=-60):
     logo_path = os.path.join('photos', 'logo.png')
     img_base64 = get_base64(logo_path)
@@ -223,6 +229,7 @@ def set_logo_wa_position(logo_width=50, margin_bottom = -50, margin_top=-60):
     """, unsafe_allow_html=True)
 
 
+# style and locate text input 
 def set_text_input(width="250", margin_bottom="-55", margin_left='192'):
     st.markdown(
     f""" 
@@ -245,6 +252,7 @@ def set_text_input(width="250", margin_bottom="-55", margin_left='192'):
     , unsafe_allow_html=True)
 
 
+# style and locate number input 
 def set_number_input(width="250", margin_bottom="-55"):
     st.markdown(
     f""" 
@@ -259,6 +267,8 @@ def set_number_input(width="250", margin_bottom="-55"):
     """
     , unsafe_allow_html=True)
 
+
+# style and locate multi select box input 
 def set_multiSelectBox_input(width="400", margin_bottom="0", margin_left='-20', margin_top=0):
     st.markdown(
     f"""
@@ -277,6 +287,7 @@ def set_multiSelectBox_input(width="400", margin_bottom="0", margin_left='-20', 
     ,unsafe_allow_html=True)
 
 
+# style and locate select box input 
 def set_selectbox_input(width="250", margin_bottom="-55", margin_left='192', margin_top=0):
     st.markdown(
     f"""
@@ -296,6 +307,8 @@ def set_selectbox_input(width="250", margin_bottom="-55", margin_left='192', mar
     """
     ,unsafe_allow_html=True)
     
+
+# locate help tooltip
 def set_help_tooltip(margin_left='100'):
     st.markdown(  
     f"""  
@@ -308,6 +321,7 @@ def set_help_tooltip(margin_left='100'):
     unsafe_allow_html=True)  
 
 
+# style circle buttons with image 
 def set_image_circle_button(b64_string, margin_left='20', margin_top='20', radius='6'):
     css_style = f"""    
                     button{{
@@ -327,6 +341,8 @@ def set_image_circle_button(b64_string, margin_left='20', margin_top='20', radiu
                     }}"""
     return css_style
 
+
+# create custom buttons style 
 def set_custom_button():
     css_style = f"""    
                     button{{
@@ -345,6 +361,8 @@ def set_custom_button():
     
     return css_style
     
+
+# style circle buttons
 def set_circle_button():    
     st.markdown(f"""        
             <style>        
@@ -374,6 +392,7 @@ def set_circle_button():
         """, unsafe_allow_html=True)
     
 
+# split text string into list of strings by max tokens limit, seperating only full sentences 
 def split_text_into_parts(text, max_tokens=400):
     sentences = text.split(".")
     parts = []
@@ -392,6 +411,7 @@ def split_text_into_parts(text, max_tokens=400):
     return parts
 
 
+# style st.tables
 def format_table(df,
                  precision=None,
                  cell_hover=True,
@@ -415,31 +435,31 @@ def format_table(df,
         raise TypeError(f"Wrong type! format_table() can accept ['pd.DataFrame', 'pd.io.formats.style.Styler', 'pd.Series'], got {type(df)}")
 
     styles = []
-    #headers and index props
+    # headers and index props
     if headers_props is None:
         headers_props = [('font-size', '16px'), ('text-align', 'center !important'), ('color', 'black'), ('background-color', fill_color)]
     styles.append(dict(selector="th", props=headers_props))
 
-    #tables cells props
+    # tables cells props
     if cells_props is None:
         cells_props = [('font-size', '14px'), ('text-align', 'center')]
     styles.append(dict(selector="td", props=cells_props))
 
-    #index names props
+    # index names props
     index_names_props = dict(selector='.index_name', props=[('font-style', 'italic')])
     styles.append(index_names_props)
 
-    #cell hover props
+    # cell hover props
     if cell_hover:  
         cell_hover_props = dict(selector="th:hover", props=[('tooltip', 'cell_hover_color')])  
         styles.append(cell_hover_props)
         
-    #table bordes props
+    # table bordes props
     if borders:
         borders_style_prop = dict(selector="td, th", props=[("border", "1px solid white !important")])
         styles.append(borders_style_prop)
     
-    #table title props
+    # table title props
     if title is not None:
         title_prop = [dict(selector="caption",
                        props=[("text-align", "center"),
@@ -448,10 +468,12 @@ def format_table(df,
         df_style = df_style.set_table_attributes("style='display:inline'").set_caption(title)
         styles.extend(title_prop)
     
-    #set styles and foramts
+    # set styles and foramts
     styled_df = df_style.set_table_styles(styles).format(formatter=formatter, precision=precision, na_rep=na_rep, thousands=",", **kwarg)
     return styled_df
 
+
+# style st.tabs
 def set_tabs():
     st.markdown("""
     <style>
@@ -477,11 +499,14 @@ def set_tabs():
     </style>""", unsafe_allow_html=True)
 
 
+# preform mean pooling and apply attention mask 
 def mean_pooling(model_output, attention_mask):
-    token_embeddings = model_output[0] #First element of model_output contains all token embeddings
+    token_embeddings = model_output[0] # First element of model_output contains all token embeddings
     input_mask_expanded = attention_mask.unsqueeze(-1).expand(token_embeddings.size()).float()
     return torch.sum(token_embeddings * input_mask_expanded, 1) / torch.clamp(input_mask_expanded.sum(1), min=1e-9)
 
+
+# convert string text to embedding matrix representation
 def text_to_embedding(text):
     tokenizer = AutoTokenizer.from_pretrained('sentence-transformers/bert-base-nli-mean-tokens')
     model = AutoModel.from_pretrained('sentence-transformers/bert-base-nli-mean-tokens')

@@ -10,6 +10,8 @@ import soundfile as sf
 import torch
 import numpy as np
 
+
+# page and styling configurations 
 st.set_page_config(layout="wide",
                    initial_sidebar_state="collapsed",
                     page_title="CustomTales",
@@ -20,8 +22,8 @@ set_button(margin_top=60, buttons_right=-70)
 set_tabs()
 db = get_db_connection()
 
+# Setting home button
 b64_home_string = set_image_porperties(os.path.join('photos', 'home_button_image.png'), image_resize=0.06, x_padding=-8, y_padding=-8)
-
 col1, col2, col3 = st.columns([0.05,0.05,0.8])
 with col2:
     with stylable_container(
@@ -34,11 +36,14 @@ with col2:
 with col3:
     set_logo(right=-60, top=-100, margin_bottom="-80", logo_width=15)
 
+
+# Getting the user information from the database for statistics calculations 
 user_name = st.session_state['USERNAME']
 db_ref = db.collection("users").document(user_name)
 doc_dict = db_ref.get().to_dict()
 
  
+ # Plot the user's weekly reading progress
 def plot_weekly_histogram(doc_dict):
     dates = []
     stories_dict = doc_dict['stories']
@@ -83,6 +88,8 @@ def plot_weekly_histogram(doc_dict):
 
     st.plotly_chart(fig)
 
+
+ # Plot the user's favorite story modes pie
 def plot_favorite_story_mode(doc_dict):
     modes = []
     stories_dict = doc_dict['stories']
@@ -123,6 +130,8 @@ def plot_favorite_story_mode(doc_dict):
     
     st.plotly_chart(fig)
 
+
+ # Plot the user's most frequent morals as a table
 def plot_most_frequent_morals(doc_dict, top_n=5):
     morals = []
     stories_dict = doc_dict['stories']
@@ -153,6 +162,8 @@ def plot_most_frequent_morals(doc_dict, top_n=5):
     styled_dataset_embeddings = format_table(moral_df, cell_hover=False, cells_props = [('font-size', '14px'), ('text-align', 'center'), ('color', 'white')])
     st.table(styled_dataset_embeddings)
    
+
+# Restore existing story. By clicking on the story title the user will be moved to 'full story' page.
 def restore_story(doc_dict):
     titles = []
     stories = []
@@ -178,6 +189,8 @@ def restore_story(doc_dict):
             chosen_story = {'title':selected_title, 'story': selected_story}
             st.session_state['chosen_story'] = chosen_story
         
+
+            # Loading the restores story audio file
             with st.spinner('Loading story...'):
                 device, processor, model, vocoder, speaker_embeddings = get_speaker_instances()
                 
@@ -201,6 +214,7 @@ def restore_story(doc_dict):
             switch_page('full_story')
             
 
+# Styling
 stats_tab, restore_story_tab = st.tabs(['Statistics', 'Restore Story'])   
 with stats_tab:
     col1, col2, col3 = st.columns([0.7, 1.2, 1.1])

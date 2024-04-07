@@ -6,6 +6,7 @@ from streamlit_extras.stylable_container import stylable_container
 import random
 
 
+# page and styling configurations 
 st.set_page_config(layout="centered",
                    initial_sidebar_state="collapsed",
                     page_title="CustomTales",
@@ -15,9 +16,10 @@ set_text_input(width="280", margin_bottom="-30", margin_left='210')
 set_selectbox_input(width="280", margin_bottom="0", margin_left='210')
 openAI_client = get_openAI_client()
 
+
+# Setting home button
 b64_gen_story_string = set_image_porperties(path=os.path.join('photos', 'generate_story_image.png'), image_resize=0.105, x_padding=-10, y_padding=-13)
 b64_home_string = set_image_porperties(path=os.path.join('photos', 'home_button_image.png'), image_resize=0.06, x_padding=-8, y_padding=-8)
-
 col1, col2, col3 = st.columns([0.05,0.05,0.8])
 with col2:
     with stylable_container(
@@ -31,7 +33,7 @@ with col3:
     set_logo(margin_bottom="-80", logo_width=20, top=-80, right=-240)
 
 
-
+# Validate the user filled all story details 
 def is_validate_details(reading_time, moral, mode):
     if not all([reading_time, moral, mode]):
         st.warning("Please fill in all fields.", icon="⚠️")
@@ -53,7 +55,9 @@ with col3:
     st.write("")
 
 
-books_df = pd.read_csv('books_data.csv')
+books_df = pd.read_csv('books_data.csv') # Loading the books df for the 'story_inspiration' section
+
+# Story fields to fill
 user_name = st.session_state['USERNAME']
 reading_time = st.text_input("Reading Time (min)", placeholder="")
 moral = st.text_input("Moral", help="""Examples:\n1. Be kind\n2. Believe in yourself\n3. Be Grateful for What You Have\n4. Never Judge a Book by its Cover\n5. Honesty is the Best Policy\n6. You only live once\n7. Never give up""")
@@ -63,6 +67,8 @@ similar_story = st.selectbox("Story Inspiration", options=['Ignored'] + list(boo
 st.markdown('<div style="margin-right: 467px;"></div>',help="Select the story template or framework to use as a basis when creating a new story.\n\nIf you're unsure which template to choose, you can leave this field as 'ignored', and a new story will be created from scratch.", unsafe_allow_html=True)
 similar_story_description = "" if similar_story == "Ignored" else books_df[books_df['Name'] == similar_story]['Description'].values[0]
 col1, col2 = st.columns([0.5,1])
+
+# Style the 'generate_story' button
 with col2:
     placeholder = st.empty()
 with stylable_container(
@@ -72,7 +78,11 @@ with stylable_container(
     is_click_generate_story = st.button(label='',key="story_time - generate_story")
 
 
+
+# Building the prompts for the stort generation
 def get_response(child_age, child_gender, child_interests, story_reading_time, moral_of_the_story, mode, main_character_name, similar_story, similar_story_description):
+    
+    # Choosing different interest for each story to increase the variance
     child_interests = child_interests.split(", ")
     if len(child_interests) < 3: 
         child_interests = random.choices(child_interests, k=3)
@@ -80,11 +90,14 @@ def get_response(child_age, child_gender, child_interests, story_reading_time, m
         child_interests = random.sample(child_interests, k=3)
     prompts = []
     if similar_story != "Ignored":
+        # If story inspiration is given then we will concatenate this part to the prompt
         similar_story_parts = [f"The story should be inspired by '{similar_story} children book. Here is the book description: {similar_story_description}.",
                             f"{similar_story}' book is the inspiration, it should echo the essence of its plot without direct replication. Here is the book description: {similar_story_description},",
                             f"{similar_story}' bookk aim to capture the story spirit and integrate it thoughtfully with a unique twist. Here is the book description: {similar_story_description}."]
     else:
         similar_story_parts = ["", "", ""]
+
+    # Build 3 different prompts to increase the variance between stories 
     prompts.append(f"""Generate children story suitable for a {child_age}-year-old {child_gender} child with interests in {child_interests[0]}. 
                     The story should be around {story_reading_time} minutes long. The moral of the story should be '{moral_of_the_story}'.
                     The mode of the story should be {mode}. The main character of the story should be named '{main_character_name}'.
@@ -129,6 +142,7 @@ def get_response(child_age, child_gender, child_interests, story_reading_time, m
         )
         outputs.append(completion.choices[0])
 
+    # Extract the stories from the LLM output
     stories = []
     for choice in outputs:
         generated_content = choice.message.content

@@ -6,6 +6,8 @@ import datetime
 import numpy as np
 import soundfile as sf
 
+
+# page and styling configurations 
 st.set_page_config(layout="wide",
                    initial_sidebar_state="collapsed",
                     page_title="CustomTales",
@@ -26,7 +28,10 @@ set_circle_button()
 
 db = get_db_connection()
 
+
+# Create the chosen story audio file when clicked and save the chosen story to the database 
 def update_story(chosen_story):
+    # save to db
     st.session_state['chosen_story'] = chosen_story
     chosen_story = {key: LEADING_CHAR + value for key, value in chosen_story.items()}
     title = chosen_story['title']
@@ -44,6 +49,7 @@ def update_story(chosen_story):
         })
 
     with st.spinner('Loading story...'):
+        # Create audio file 
         device, processor, model, vocoder, speaker_embeddings = get_speaker_instances()
         
         def generate_voice(story):  
@@ -66,6 +72,7 @@ def update_story(chosen_story):
     switch_page('full_story')
 
 
+# Updating the chosen story
 if st.session_state['is_story_1_clicked']:
     st.session_state['is_clicked_choose_story'] = True
     st.session_state['is_story_1_clicked'] = False
@@ -87,10 +94,12 @@ def change_sessison_state(button_name, status):
     st.session_state[button_name] = status
 
 
+# Stories styling 
 if st.session_state['stories']:
     stories = st.session_state['stories']
     fill_color = "rgba(255, 255, 255, 0.5)"  
     col1, col2, col3 = st.columns([1,1,1])
+    # Heuristic for calculating the story box size  
     long_title = False
     for i in range(3):
         title_len = len(stories[i]['title'])
